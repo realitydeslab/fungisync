@@ -18,33 +18,14 @@ public class NetcodeConnectionManager : MonoBehaviour
     ushort serverPort = 7777;
     public ushort Port { get => serverPort; set => serverPort = value; }
 
-    //public ServerIPSynchronizer serverIPSynchronizer;
-
     string localIP = "";
     public string LocalIP { get => localIP; }
 
     public UnityEvent<ulong> OnClientJoinedEvent;
     public UnityEvent<ulong> OnClientLostEvent;
-
     public UnityEvent OnServerLostEvent;
 
     Action<bool, string> OnReceiveConnectionResultAction;
-
-
-    enum ConnectionMode
-    {
-        Undefined,
-        Client,
-        Server,
-        Host
-    }
-    ConnectionMode connectionMode = ConnectionMode.Undefined;
-
-    void Awake()
-    {
-
-
-    }
 
     #region Event Listener
     void RegisterCallback()
@@ -66,6 +47,8 @@ public class NetcodeConnectionManager : MonoBehaviour
         // As a server, if a new client joined
         if (NetworkManager.Singleton.IsServer)
         {
+            Debug.Log($"[{this.GetType()}] Client {client_id} just connected.");
+
             OnClientJoinedEvent?.Invoke(client_id);
         }
 
@@ -86,6 +69,8 @@ public class NetcodeConnectionManager : MonoBehaviour
         // As a server, when client left
         if (NetworkManager.Singleton.IsServer)
         {
+            Debug.Log($"[{this.GetType()}] Client {client_id} just left.");
+
             OnClientLostEvent?.Invoke(client_id);
         }
 
@@ -105,6 +90,8 @@ public class NetcodeConnectionManager : MonoBehaviour
             // When suddenly lost Server
             else
             {
+                Debug.Log($"[{this.GetType()}] Server lost.");
+
                 OnServerLostEvent?.Invoke();
 
                 UnregisterCallback();
