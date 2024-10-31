@@ -70,6 +70,15 @@ public class ServerIPSynchronizer : MonoBehaviour
         }
     }
 
+    public void OnReceiveServerIp(string ip)
+    {
+        if (ip.Length > 0 && IsIPAddressValide(ip))
+        {
+            serverIp = ip;
+            Debug.Log($"[{this.GetType()}]Received Server Ip:{ip}");
+        }
+    }
+
     public void StartBroadcastingServerIp(string ip)
     {
         serverIp = ip;

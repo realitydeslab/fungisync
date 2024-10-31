@@ -188,11 +188,9 @@ public class NetcodeConnectionManager : MonoBehaviour
 
         Debug.Log($"[{this.GetType()}] {msg}");
 
+        serverIP = localIP = GetLocalIPAddress();
+
         callback?.Invoke(result, msg);
-
-        localIP = GetLocalIPAddress();
-
-        serverIP = localIP;
 
         if (result == false) UnregisterCallback();
     }
@@ -226,11 +224,9 @@ public class NetcodeConnectionManager : MonoBehaviour
 
         Debug.Log($"[{this.GetType()}] {msg}");
 
+        serverIP = localIP = GetLocalIPAddress();
+
         callback?.Invoke(result, msg);
-
-        localIP = GetLocalIPAddress();
-
-        serverIP = localIP;
 
         if (result == false) UnregisterCallback();
     }
