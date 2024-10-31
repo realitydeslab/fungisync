@@ -35,7 +35,7 @@ public class ServerIPSynchronizer : MonoBehaviour
 
         Debug.Log($"[{this.GetType()}] Start receiving ServerIp.");
 
-        TryReceivingServerIp(action);
+        StartCoroutine(TryReceivingServerIp(action));
     }
 
     IEnumerator TryReceivingServerIp(System.Action<string> action)
@@ -48,24 +48,24 @@ public class ServerIPSynchronizer : MonoBehaviour
             {
                 result = true;
                 break;
-            }            
-
-            yield return new WaitForSeconds(1);
+            }
 
             Debug.Log($"[{this.GetType()}] Elapsed time: {Time.time - start_time}");
+
+            yield return new WaitForSeconds(1);            
         }
 
         oscReceiver.enabled = false;
         if (result)
         {
             // successfully received the server ip
-            Debug.Log($"[{this.GetType()}] Received ServerIp: {serverIp}");
+            Debug.Log($"[{this.GetType()}] Server Ip has been successfully sychronized. Server Ip:{serverIp}");
             action?.Invoke(serverIp);
         }
         else
         {
             // failed to receive the server ip
-            Debug.Log($"[{this.GetType()}] Receiving ServerIp time out.");
+            Debug.Log($"[{this.GetType()}] Server Ip sychronization time out.");
             action?.Invoke("");
         }
     }
@@ -101,6 +101,8 @@ public class ServerIPSynchronizer : MonoBehaviour
         serverIp = "";
         oscSender.enabled = false;
         oscReceiver.enabled = false;
+
+        Debug.Log($"[{this.GetType()}] Reset Server IP Synchronizer.");
     }
 
     public bool IsIPAddressValide(string ip)
