@@ -18,7 +18,7 @@ public class TestOnSpawned : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("Update");
+
     }
 
     public override void OnNetworkSpawn()
