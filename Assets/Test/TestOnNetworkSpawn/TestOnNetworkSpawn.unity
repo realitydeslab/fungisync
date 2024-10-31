@@ -732,15 +732,15 @@ GameObject:
   m_Component:
   - component: {fileID: 530827141}
   - component: {fileID: 530827140}
-  - component: {fileID: 530827139}
   - component: {fileID: 530827138}
+  - component: {fileID: 530827142}
   m_Layer: 0
   m_Name: ServerIpSynchronizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &530827138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -795,23 +795,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &530827139
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 530827137}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e43cc78b62f2184d8bebe41bd574f9e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _connection: {fileID: 11400000, guid: dd8d5fdd4c892446dba92be26073f294, type: 2}
-  _oscAddress: /serverip
-  _dataSource: {fileID: 530827140}
-  _propertyName: ServerIP
-  _keepSending: 0
 --- !u!114 &530827140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -824,8 +807,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03402eae5fc9248f9be20a3a25080dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oscSender: {fileID: 530827139}
-  oscReceiver: {fileID: 530827138}
 --- !u!4 &530827141
 Transform:
   m_ObjectHideFlags: 0
@@ -841,6 +822,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &530827142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 530827137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc0794c548f949608dc69c0553aaef0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _connection: {fileID: 11400000, guid: dd8d5fdd4c892446dba92be26073f294, type: 2}
+  _oscAddress: /serverip
+  _dataSource: {fileID: 530827140}
+  _propertyName: ServerIP
+  _keepSending: 1
+  _timeInterval: 1
+  _needRemapping: 0
+  _needClamp: 0
+  _srcRange: {x: 0, y: 1}
+  _dstRange: {x: 0, y: 1}
+  successfullySend: 0
+  _floatValue: 3.4028235e+38
+  _originalFloatValue: 3.4028235e+38
 --- !u!1 &616534630
 GameObject:
   m_ObjectHideFlags: 0
