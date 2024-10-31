@@ -10,8 +10,8 @@ using System.Linq;
 
 namespace OscJack
 {
-    [CanEditMultipleObjects, CustomEditor(typeof(OscPropertySenderModified))]
-    class OscPropertySenderModifiedEditor : Editor
+    [CanEditMultipleObjects, CustomEditor(typeof(OscPropertySender))]
+    class OscPropertySenderEditor : Editor
     {
         #region Editable properties
 
@@ -20,11 +20,6 @@ namespace OscJack
         SerializedProperty _dataSource;
         SerializedProperty _propertyName;
         SerializedProperty _keepSending;
-
-        SerializedProperty _needRemapping;
-        SerializedProperty _needClamp;
-        SerializedProperty _srcRange;
-        SerializedProperty _dstRange;
 
         #endregion
 
@@ -46,11 +41,6 @@ namespace OscJack
             _dataSource   = serializedObject.FindProperty("_dataSource");
             _propertyName = serializedObject.FindProperty("_propertyName");
             _keepSending  = serializedObject.FindProperty("_keepSending");
-
-            _needRemapping = serializedObject.FindProperty("_needRemapping");
-            _needClamp = serializedObject.FindProperty("_needClamp");
-            _srcRange = serializedObject.FindProperty("_srcRange");
-            _dstRange= serializedObject.FindProperty("_dstRange");
         }
 
         public override void OnInspectorGUI()
@@ -75,14 +65,6 @@ namespace OscJack
             }
 
             EditorGUILayout.PropertyField(_keepSending);
-
-            EditorGUILayout.PropertyField(_needRemapping);
-
-            EditorGUILayout.PropertyField(_needClamp);
-
-            EditorGUILayout.PropertyField(_srcRange);
-
-            EditorGUILayout.PropertyField(_dstRange);
 
             serializedObject.ApplyModifiedProperties();
         }

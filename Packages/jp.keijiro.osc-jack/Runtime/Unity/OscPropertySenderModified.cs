@@ -27,6 +27,9 @@ namespace OscJack
         public string _propertyName = "";
         [SerializeField]
         public bool _keepSending = false;
+        [SerializeField]
+        public float _timeInterval = 0;
+        float _lastSendTime = 0;
 
         [SerializeField] bool _needRemapping = true;
         public bool _needClamp = true;
@@ -109,13 +112,16 @@ namespace OscJack
         public void Send(int data)
         {
             if (_needRemapping) data = Mathf.FloorToInt(Remap(data, _srcRange.x, _srcRange.y, _dstRange.x, _dstRange.y, _needClamp));
-
+            
             if (!_keepSending && data == _intValue) return;
+
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
 
             try
             {
                 _client.Send(_oscAddress, data);
                 successfullySend = true;
+                _lastSendTime = Time.time;
             }
             catch
             {
@@ -135,10 +141,13 @@ namespace OscJack
 
             if (!_keepSending && data == _floatValue) return;
 
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
+
             try
             {
                 _client.Send(_oscAddress, data);
                 successfullySend = true;
+                _lastSendTime = Time.time;
             }
             catch {
                 successfullySend = false;
@@ -158,10 +167,13 @@ namespace OscJack
 
             if (!_keepSending && data == _vector2Value) return;
 
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
+
             try
             {
                 _client.Send(_oscAddress, data.x, data.y);
                 successfullySend = true;
+                _lastSendTime = Time.time;
             }
             catch
             {
@@ -183,10 +195,14 @@ namespace OscJack
             }
 
             if (!_keepSending && data == _vector3Value) return;
+
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
+
             try
             {
                 _client.Send(_oscAddress, data.x, data.y, data.z);
                 successfullySend = true;
+                _lastSendTime = Time.time;
             }
             catch
             {
@@ -210,10 +226,13 @@ namespace OscJack
 
             if (!_keepSending && data == _vector4Value) return;
 
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
+
             try
             {
                 _client.Send(_oscAddress, data.x, data.y, data.z, data.w);
                 successfullySend = true;
+                _lastSendTime = Time.time;
             }
             catch
             {
@@ -235,8 +254,19 @@ namespace OscJack
 
             if (!_keepSending && data == _vector2IntValue) return;
 
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
 
-            _client.Send(_oscAddress, data.x, data.y);
+            try
+            {
+                _client.Send(_oscAddress, data.x, data.y);
+                successfullySend = true;
+                _lastSendTime = Time.time;
+            }
+            catch
+            {
+                successfullySend = false;
+            }
+
             _vector2IntValue = data;
         }
 
@@ -253,8 +283,19 @@ namespace OscJack
 
             if (!_keepSending && data == _vector3IntValue) return;
 
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
 
-            _client.Send(_oscAddress, data.x, data.y, data.z);
+            try
+            {
+                _client.Send(_oscAddress, data.x, data.y, data.z);
+                successfullySend = true;
+                _lastSendTime = Time.time;
+            }
+            catch
+            {
+                successfullySend = false;
+            }
+
             _vector3IntValue = data;
         }
 
@@ -263,7 +304,20 @@ namespace OscJack
         public void Send(string data)
         {
             if (!_keepSending && data == _stringValue) return;
-            _client.Send(_oscAddress, data);
+
+            if (_keepSending && Time.time - _lastSendTime < _timeInterval) return;
+
+            try
+            {
+                _client.Send(_oscAddress, data);
+                successfullySend = true;
+                _lastSendTime = Time.time;
+            }
+            catch
+            {
+                successfullySend = false;
+            }
+
             _stringValue = data;
         }
 

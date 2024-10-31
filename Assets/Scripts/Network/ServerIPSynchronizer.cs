@@ -13,34 +13,32 @@ public class ServerIPSynchronizer : MonoBehaviour
         get => serverIp;
     }
 
-    public bool IsServerIpValid
-    {
-        get
-        {
-            return (serverIp.Length > 0 && IsIPAddressValide(serverIp));
-        }
-    }
     float receivingTimeOut = 10;
 
-    [SerializeField]
-    OscPropertySender oscSender;
-    [SerializeField]
+    OscPropertySenderModified oscSender;
     OscEventReceiver oscReceiver;
 
+    void Awake()
+    {
+        oscSender = gameObject.GetComponent<OscPropertySenderModified>();
+        oscReceiver = gameObject.GetComponent<OscEventReceiver>();
+    }
 
     void Start()
     {
         ResetConnection();
     }
 
-    public void StartReceivingServerIp(UnityAction<string> action)
+    public void StartReceivingServerIp(System.Action<string> action)
     {
         oscReceiver.enabled = true;
+
+        Debug.Log($"[{this.GetType()}] Start receiving ServerIp.");
 
         TryReceivingServerIp(action);
     }
 
-    IEnumerator TryReceivingServerIp(UnityAction<string> action)
+    IEnumerator TryReceivingServerIp(System.Action<string> action)
     {
         float start_time = Time.time;
         bool result = false;
@@ -48,34 +46,29 @@ public class ServerIPSynchronizer : MonoBehaviour
         {
             if (serverIp.Length > 0 && IsIPAddressValide(serverIp))
             {
-
                 result = true;
                 break;
-            }
-            yield return null;
+            }            
+
+            yield return new WaitForSeconds(1);
+
+            Debug.Log($"[{this.GetType()}] Elapsed time: {Time.time - start_time}");
         }
 
         oscReceiver.enabled = false;
         if (result)
         {
             // successfully received the server ip
+            Debug.Log($"[{this.GetType()}] Received ServerIp: {serverIp}");
             action?.Invoke(serverIp);
         }
         else
         {
             // failed to receive the server ip
+            Debug.Log($"[{this.GetType()}] Receiving ServerIp time out.");
             action?.Invoke("");
         }
     }
-
-    //public void OnReceiveServerIp(string ip)
-    //{
-    //    if (ip.Length > 0 && IsIPAddressValide(ip) && serverIp != ip)
-    //    {
-    //        serverIp = ip;
-    //        Debug.Log($"[{this.GetType()}]Received Server Ip:{ip}");
-    //    }            
-    //}
 
     public void StartBroadcastingServerIp(string ip)
     {
@@ -83,6 +76,15 @@ public class ServerIPSynchronizer : MonoBehaviour
 
         // keep sending server ip
         oscSender.enabled = true;
+
+        Debug.Log($"[{this.GetType()}] Start broadcasting ServerIp.");
+    }
+
+    public void StopBroadcastingServerIp()
+    {
+        oscSender.enabled = false;
+
+        Debug.Log($"[{this.GetType()}] Stop broadcasting ServerIp.");
     }
 
     public void ResetConnection()

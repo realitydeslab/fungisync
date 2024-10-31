@@ -192,6 +192,8 @@ public class NetcodeConnectionManager : MonoBehaviour
 
         localIP = GetLocalIPAddress();
 
+        serverIP = localIP;
+
         if (result == false) UnregisterCallback();
     }
 
@@ -227,6 +229,8 @@ public class NetcodeConnectionManager : MonoBehaviour
         callback?.Invoke(result, msg);
 
         localIP = GetLocalIPAddress();
+
+        serverIP = localIP;
 
         if (result == false) UnregisterCallback();
     }

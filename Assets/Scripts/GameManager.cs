@@ -19,21 +19,35 @@ public class GameManager : MonoBehaviour
 
     public void JoinAsClient()
     {
-        connectionManager.StartClient(new System.Action<bool, string>((result, msg) => { Debug.Log($"{result}, {msg}"); }));
+        serverIPSynchronizer.StartReceivingServerIp(new System.Action<string>(server_ip => {
+            connectionManager.ServerIP = server_ip;
+
+            connectionManager.StartClient(new System.Action<bool, string>((result, msg) => { Debug.Log($"{result}, {msg}"); }));
+        }));        
     }
 
     public void JoinAsHost()
     {
-        connectionManager.StartHost(new System.Action<bool, string>((result, msg) => { Debug.Log($"{result}, {msg}"); }));
+        connectionManager.StartHost(new System.Action<bool, string>((result, msg) => {
+            Debug.Log($"{result}, {msg}");
+            if (result)
+                serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
+        }));
     }
 
     public void JoinAsServer()
     {
-        connectionManager.StartServer(new System.Action<bool, string>((result, msg) => { Debug.Log($"{result}, {msg}"); }));
+        connectionManager.StartServer(new System.Action<bool, string>((result, msg) => {
+            Debug.Log($"{result}, {msg}");
+            if (result)
+                serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
+        }));
     }
 
     public void Shutdown()
     {
         connectionManager.ShutDown();
+
+        serverIPSynchronizer.ResetConnection();
     }
 }

@@ -121,11 +121,10 @@
       }
     },
     "jp.keijiro.osc-jack": {
-      "version": "2.0.0",
+      "version": "file:jp.keijiro.osc-jack",
       "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://registry.npmjs.com"
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
