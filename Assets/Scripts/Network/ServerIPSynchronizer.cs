@@ -24,11 +24,6 @@ public class ServerIPSynchronizer : MonoBehaviour
         oscReceiver = gameObject.GetComponent<OscEventReceiver>();
     }
 
-    void Start()
-    {
-        ResetConnection();
-    }
-
     public void StartReceivingServerIp(System.Action<string> action)
     {
         oscReceiver.enabled = true;
