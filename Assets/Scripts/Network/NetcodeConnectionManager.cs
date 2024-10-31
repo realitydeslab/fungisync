@@ -47,7 +47,7 @@ public class NetcodeConnectionManager : MonoBehaviour
         // As a server, if a new client joined
         if (NetworkManager.Singleton.IsServer)
         {
-            Debug.Log($"[{this.GetType()}] Client {client_id} just connected.");
+            Debug.Log($"[{this.GetType()}] Client (ID= {client_id}) just connected.");
 
             OnClientJoinedEvent?.Invoke(client_id);
         }
@@ -69,7 +69,7 @@ public class NetcodeConnectionManager : MonoBehaviour
         // As a server, when client left
         if (NetworkManager.Singleton.IsServer)
         {
-            Debug.Log($"[{this.GetType()}] Client {client_id} just left.");
+            Debug.Log($"[{this.GetType()}] Client (ID= {client_id}) just left.");
 
             OnClientLostEvent?.Invoke(client_id);
         }
