@@ -75,13 +75,23 @@ public class NetcodeConnectionManager : MonoBehaviour
 
     void OnClientStarted()
     {
+        if(OnReceiveConnectionResultAction != null)
+        {
+            string msg = "Client successfully connected to server.";
+            OnReceiveConnectionResultAction?.Invoke(true, msg);
+            OnReceiveConnectionResultAction = null;
+        }
+
         Debug.Log("Listener : OnClientStarted");
+
         localIP = GetLocalIPAddress();
     }
 
     void OnClientStopped(bool result)
     {
         Debug.Log("Listener : OnClientStopped " + result);
+
+
     }
 
     void OnServerStarted()
@@ -107,36 +117,50 @@ public class NetcodeConnectionManager : MonoBehaviour
 
     void OnClientConnectedCallback(ulong client_id)
     {
-        Debug.Log(string.Format("OnClientConnectedCallback | IsServer:{0}, IsClient:{1}, ClientID:{2}", NetworkManager.Singleton.IsServer, NetworkManager.Singleton.IsClient, client_id));
+        Debug.Log(string.Format("OnClientConnectedCallback | IsServer:{0}, IsClient:{1}, IsHost:{2}, ClientID:{3}", NetworkManager.Singleton.IsServer, NetworkManager.Singleton.IsClient, NetworkManager.Singleton.IsHost, client_id));
 
-        // If it's in the process of establishing new connection
-        if (OnReceiveConnectionResultAction != null)
+        // If a new client joined
+        if (NetworkManager.Singleton.IsServer)
         {
-            string msg = "";
-            if (NetworkManager.Singleton.IsHost)
-            {
-                msg = "Host established.";
-            }
-            else if (NetworkManager.Singleton.IsServer)
-            {
-                msg = "Server established.";
-            }
-            else if (NetworkManager.Singleton.IsClient)
-            {
-                msg = "Client established.";
-            }
+            OnClientJoinedEvent?.Invoke(client_id);
+        }
 
+        if (NetworkManager.Singleton.IsClient)
+        {
+            string msg = "Connected.";
             OnReceiveConnectionResultAction?.Invoke(true, msg);
             OnReceiveConnectionResultAction = null;
         }
-        else
-        {
-            // If a new client joined
-            if (NetworkManager.Singleton.IsServer)
-            {
-                OnClientJoinedEvent?.Invoke(client_id);
-            }
-        }
+
+
+        //// If it's in the process of establishing new connection
+        //if (OnReceiveConnectionResultAction != null)
+        //{
+        //    string msg = "";
+        //    if (NetworkManager.Singleton.IsHost)
+        //    {
+        //        msg = "Host established.";
+        //    }
+        //    else if (NetworkManager.Singleton.IsServer)
+        //    {
+        //        msg = "Server established.";
+        //    }
+        //    else if (NetworkManager.Singleton.IsClient)
+        //    {
+        //        msg = "Client established.";
+        //    }
+
+        //    OnReceiveConnectionResultAction?.Invoke(true, msg);
+        //    OnReceiveConnectionResultAction = null;
+        //}
+        //else
+        //{
+        //    // If a new client joined
+        //    if (NetworkManager.Singleton.IsServer)
+        //    {
+        //        OnClientJoinedEvent?.Invoke(client_id);
+        //    }
+        //}
     }
 
     void OnClientDisconnectCallback(ulong client_id)
@@ -265,7 +289,6 @@ public class NetcodeConnectionManager : MonoBehaviour
             return;
         }
 
-
         OnBeforeClientStarted();
 
         RegisterCallback();
@@ -303,20 +326,14 @@ public class NetcodeConnectionManager : MonoBehaviour
 
         Debug.Log($"[{this.GetType()}] | Starting Server.");
 
+        // Will send back result instantly
         bool result = NetworkManager.Singleton.StartServer();
 
-        if (result == true)
-        {
-            OnReceiveConnectionResultAction = callback;
-        }
-        else
-        {
-            string msg = "Failed to start server";
+        string msg = result ? "Server established." : "Failed to start server.";        
 
-            Debug.Log($"[{this.GetType()}] | {msg}");
+        Debug.Log($"[{this.GetType()}] {msg}");
 
-            callback?.Invoke(false, msg);
-        }
+        callback?.Invoke(result, msg);
     }
 
     public void StartHost(Action<bool, string> callback)
@@ -334,20 +351,14 @@ public class NetcodeConnectionManager : MonoBehaviour
 
         Debug.Log($"[{this.GetType()}] | Starting Host.");
 
+        // Will send back result instantly
         bool result = NetworkManager.Singleton.StartHost();
 
-        if (result == true)
-        {
-            OnReceiveConnectionResultAction = callback;
-        }
-        else
-        {
-            string msg = result ? "Host started." : "Failed to start host";
+        string msg = result ? "Host established." : "Failed to start host.";
 
-            Debug.Log($"[{this.GetType()}] | {msg}");
+        Debug.Log($"[{this.GetType()}] {msg}");
 
-            callback?.Invoke(result, msg);
-        }
+        callback?.Invoke(result, msg);
     }
 
     public void ShutDown()
