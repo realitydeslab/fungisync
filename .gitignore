@@ -73,3 +73,6 @@ crashlytics-build.properties
 
 
 .DS_Store
+/[Aa]ssets/Samples/
+/[Aa]ssets/[Tt]est/
+/[Aa]ssets/[Tt]ests/
