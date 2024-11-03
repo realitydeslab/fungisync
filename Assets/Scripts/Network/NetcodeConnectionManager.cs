@@ -139,7 +139,7 @@ public class NetcodeConnectionManager : MonoBehaviour
 
         RegisterCallback();
 
-        Debug.Log($"[{this.GetType()}] Starting Client.");
+        Debug.Log($"[{this.GetType()}] Starting Client and connecting to {serverIP}:{serverPort}");
 
         bool result = NetworkManager.Singleton.StartClient();
 

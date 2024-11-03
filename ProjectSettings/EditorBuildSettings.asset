@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Test/TestOnNetworkSpawn/TestOnNetworkSpawn.unity
     guid: cbf82ea1c3aa74f808ab7e0604b8ff13
-  - enabled: 1
+  - enabled: 0
     path: Assets/Test/TestHandTracking/TestHandTracking.unity
     guid: c75ad63be19b54c0193ad39e0db6bb9c
   - enabled: 0

@@ -40,9 +40,9 @@ public struct PlayerHand : INetworkSerializable, System.IEquatable<PlayerHand>
 public class Player : NetworkBehaviour
 {
 
-    public NetworkVariable<PlayerRole> role = new NetworkVariable<PlayerRole>(PlayerRole.Player);
-    public NetworkVariable<int> currentEffectIndex = new NetworkVariable<int>(-1);
-    public NetworkVariable<int> targetEffectIndex = new NetworkVariable<int>(-1);
+    public NetworkVariable<PlayerRole> role = new NetworkVariable<PlayerRole>(PlayerRole.Player, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> currentEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> targetEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     float effectLerp = 0;
 
     HandTrackingManager handTrackingManager;
@@ -71,6 +71,9 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
+        if (IsOwner == false)
+            return;
+
         UpdatePositionAndRotation();
     }
 
@@ -99,6 +102,9 @@ public class Player : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        if (IsOwner == false)
+            return;
+
         if (GameManager.Instance != null)
         {
             // Not sure the execution order between OnNetworkSpawn and OnRoleSpecified.
@@ -117,6 +123,9 @@ public class Player : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
+
+        if (IsOwner == false)
+            return;
 
         if (GameManager.Instance != null)
         {
