@@ -10,7 +10,7 @@ public class UIManager : MonoBehaviour
 {
 
     [SerializeField]
-    string serverPassword = "222";
+    string serverPassword = "123";
 
     GameManager gameManager;    
     HoloKitCameraManager holoKitManager;
@@ -172,6 +172,8 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.JoinAsPlayer((result, msg)=> {
             if(result == true)
             {
+                RegisterCallback();
+
                 GotoRelocalizationPage();
             }
             else
@@ -187,9 +189,11 @@ public class UIManager : MonoBehaviour
     {
         GotoWaitingPage("Connecting to server..");
 
-        GameManager.Instance.JoinAsPlayer((result, msg) => {
+        GameManager.Instance.JoinAsSpectator((result, msg) => {
             if (result == true)
             {
+                RegisterCallback();
+
                 GotoRelocalizationPage();
             }
             else
@@ -224,7 +228,7 @@ public class UIManager : MonoBehaviour
         string pwd = input_field.text;
         if(pwd == serverPassword)
         {
-            GameManager.Instance.JoinAsServer((result, msg) =>
+            GameManager.Instance.JoinAsHost((result, msg) =>
             {
                 if (result == true)
                 {
@@ -380,12 +384,36 @@ public class UIManager : MonoBehaviour
         panelWarning.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Restart game when
+    /// 1. click exit game - client/server
+    /// 2. suddenly lost server - client
+    /// </summary>
     void RestartGame()
     {
         GameManager.Instance.RestartGame(() =>
         {
-            GotoPage("Page_Home");
+            UnregisterCallback();
+
+            GotoPage("Page_Home");            
         });
+    }
+    #endregion
+
+    #region Callbacks
+    void RegisterCallback()
+    {
+        GameManager.Instance.ConnectionManager.OnServerLostEvent.AddListener(OnServerLostCallback);
+    }
+
+    void UnregisterCallback()
+    {
+        GameManager.Instance.ConnectionManager.OnServerLostEvent.RemoveListener(OnServerLostCallback);
+    }
+
+    void OnServerLostCallback()
+    {
+        RestartGame();
     }
     #endregion
 }

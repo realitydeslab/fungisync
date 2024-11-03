@@ -3,70 +3,65 @@ using UnityEngine.Events;
 using HoloKit;
 using HoloKit.ImageTrackingRelocalization;
 using Unity.Netcode;
+using System.Collections;
+
+public enum GameMode
+{
+    Undefined,
+    SinglePlayer,
+    MultiplePlayer
+}
+
+public enum PlayerRole
+{
+    /// <summary>
+    /// Individual player in network.
+    /// Own its own effect.
+    /// Can interactive with others.
+    /// </summary>
+    Player,
+
+    /// <summary>
+    /// Can only see other's effect
+    /// </summary>
+    Spectator,
+
+    /// <summary>
+    /// Working as server in network.
+    /// Can see other's effect like Spectator
+    /// </summary>
+    Host
+}
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField]
-    bool isInDevelopment = false;
+    [SerializeField] bool isInDevelopment = false;
     public bool IsInDevelopment { get => isInDevelopment; set => isInDevelopment = value; }
 
-    public ServerIPSynchronizer serverIPSynchronizer;
-    public NetcodeConnectionManager connectionManager;
-    public ImageTrackingStablizer relocalizationStablizer;
+    [Header("References")]
+    [SerializeField] NetcodeConnectionManager connectionManager;
+    public NetcodeConnectionManager ConnectionManager { get => connectionManager; }
+
+    [SerializeField] ServerIPSynchronizer serverIPSynchronizer;    
+    [SerializeField] ImageTrackingStablizer relocalizationStablizer;
 
 
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    GameMode gameMode;
+    public GameMode GameMode { get => gameMode; }
 
-    void RegisterCallback()
-    {
-        // should register right after role is specified
+    PlayerRole playerRole;
+    public PlayerRole PlayerRole { get => playerRole; }
 
-        //if(NetworkManager.Singleton.IsServer)
-        //{
-        //    connectionManager.OnClientJoinedEvent += OnClientJoinedCallback;
-        //    connectionManager.OnClientLostEvent += OnClientLostCallback;            
-        //}
-
-        //if(NetworkManager.Singleton.IsClient)
-        //{
-        //    connectionManager.OnServerLostEvent += OnServerLostCallback;
-        //}        
-    }
-
-    void UnregisterCallback()
-    {
-        // should unregister when game stops
-
-        //if (NetworkManager.Singleton.IsServer)
-        //{
-        //    connectionManager.OnClientJoinedEvent -= OnClientJoinedCallback;
-        //    connectionManager.OnClientLostEvent -= OnClientLostCallback;
-        //}
-
-        //if (NetworkManager.Singleton.IsClient)
-        //{
-        //    connectionManager.OnServerLostEvent -= OnServerLostCallback;
-        //}
-    }
+    [Header("Events")]
+    public UnityEvent<GameMode, PlayerRole> OnRoleSpecified;
 
     #region Network Connection
     public void StartSinglePlayer(System.Action<bool, string> action)
     {
         // Set role to singler player
-        //SetRole();
-
-        // register callback
+        SetRole(GameMode.SinglePlayer, PlayerRole.Player);        
 
         // Update UI
         action?.Invoke(true, "");
@@ -75,14 +70,15 @@ public class GameManager : MonoBehaviour
     public void JoinAsPlayer(System.Action<bool, string> action)
     {
         StartClient((result, msg) =>
-        {
+        {     
+            if (result == true)
+            {
+                // Set role to player
+                SetRole(GameMode.MultiplePlayer, PlayerRole.Player);
+            }
+
             // Update UI
             action?.Invoke(result, msg);
-
-            if (result == true)
-            {                
-                // Set role to player
-            }
         });
     }
 
@@ -93,6 +89,7 @@ public class GameManager : MonoBehaviour
             if (result == true)
             {
                 // Set role to spectator
+                SetRole(GameMode.MultiplePlayer, PlayerRole.Spectator);
             }
 
             // Update UI
@@ -100,13 +97,14 @@ public class GameManager : MonoBehaviour
         });
     }
 
-    public void JoinAsServer(System.Action<bool, string> action)
+    public void JoinAsHost(System.Action<bool, string> action)
     {
         StartHost((result, msg) =>
         {
             if (result == true)
             {
                 // Set role to host
+                SetRole(GameMode.MultiplePlayer, PlayerRole.Host);
             }
 
             // Update UI
@@ -116,15 +114,18 @@ public class GameManager : MonoBehaviour
 
     void StartClient(System.Action<bool, string> action)
     {
+        // 1. Receive Server IP
         serverIPSynchronizer.StartReceivingServerIp(((server_ip_result, server_ip_msg) => {
             if(server_ip_result)
             {
+                // 2. Set Server IP
                 connectionManager.ServerIP = server_ip_msg;
 
-                connectionManager.StartClient(((result, msg) => {
-                    Debug.Log($"{result}, {msg}");
+                // 3. Start Connection
+                connectionManager.StartClient(((connection_result, connection_msg) => {
 
-                    action?.Invoke(result, msg);
+                    action?.Invoke(connection_result, connection_msg);
+
                 }));
             }
             else
@@ -138,7 +139,6 @@ public class GameManager : MonoBehaviour
     void StartHost(System.Action<bool, string> action)
     {
         connectionManager.StartHost(((result, msg) => {
-            Debug.Log($"{result}, {msg}");
 
             if (result)
                 serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
@@ -150,7 +150,6 @@ public class GameManager : MonoBehaviour
     void StartServer(System.Action<bool, string> action)
     {
         connectionManager.StartServer(new System.Action<bool, string>((result, msg) => {
-            Debug.Log($"{result}, {msg}");
 
             if (result)
                 serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
@@ -161,7 +160,7 @@ public class GameManager : MonoBehaviour
 
     void Shutdown()
     {
-        // if role == network
+        if(gameMode == GameMode.MultiplePlayer)
         {
             connectionManager.ShutDown();
 
@@ -169,13 +168,42 @@ public class GameManager : MonoBehaviour
         }        
     }
 
+    void WaitForPlayerPrefabSpawned(System.Action<bool, string> action)
+    {
+        StartCoroutine(WaitForPlayerPrefabSpawnedCoroutine(10, action));
+    }
+
+    IEnumerator WaitForPlayerPrefabSpawnedCoroutine(float time_out, System.Action<bool, string> action)
+    {
+        float start_time = Time.time;
+        bool result = true;
+        while(NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
+        {
+            yield return new WaitForSeconds(0.1f);
+
+            if (Time.time - start_time > time_out)
+            {
+                result = false;
+                break;
+            }                
+        }
+
+        string msg = result ? "Player prefab spawned." : "Waiting for Player prefab spawned times out.";
+
+        Debug.Log($"[{this.GetType()}] {msg}");
+        
+        action?.Invoke(result, msg);
+    }
+
+    
+
     public void RestartGame(System.Action action)
     {
+        // Shutdown network
         Shutdown();
 
-        // set role to undefined
-
-        // remove all callbacks
+        // Reset Role
+        ResetRole();
 
         // Update UI
         action?.Invoke();
@@ -227,7 +255,96 @@ public class GameManager : MonoBehaviour
             return 0;
     }
 
-#endregion
+    #endregion
+
+    #region Role
+    void SetRole(GameMode game_mode, PlayerRole player_role)
+    {
+        // register callback
+        RegisterCallback(game_mode, player_role);
+
+        // update mode and role
+        gameMode = game_mode;
+        playerRole = player_role;
+
+        Debug.Log($"[{this.GetType()}] Set GameMode to {gameMode} and PlayerRole to {playerRole}");
+
+        // execute callbacks
+        OnRoleSpecified?.Invoke(game_mode, player_role);
+    }
+
+
+    /// <summary>
+    /// Need to reset role when game stops
+    /// 1. click exit game - client/server
+    /// 2. suddenly lost - client
+    /// </summary>
+    void ResetRole()
+    {
+        // unregister callbacks
+        UnregisterCallback(gameMode, playerRole);
+
+        // update mode and role
+        gameMode = GameMode.Undefined;
+        playerRole = PlayerRole.Player;
+
+        Debug.Log($"[{this.GetType()}] Reset Role");
+    }
+
+    /// <summary>
+    /// Should register right after role is specified
+    /// </summary>
+    void RegisterCallback(GameMode game_mode, PlayerRole player_role)
+    {
+        
+        if (game_mode == GameMode.MultiplePlayer)
+        {
+            connectionManager.OnClientJoinedEvent.AddListener(OnClientJoinedCallback);
+            connectionManager.OnClientLostEvent.AddListener(OnClientLostCallback);
+
+            if (player_role == PlayerRole.Player || player_role == PlayerRole.Spectator)
+            {
+                connectionManager.OnServerLostEvent.AddListener(OnServerLostCallback);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Should unregister when game stops
+    /// </summary>
+    void UnregisterCallback(GameMode game_mode, PlayerRole player_role)
+    {
+        if (game_mode == GameMode.MultiplePlayer)
+        {
+            connectionManager.OnClientJoinedEvent.RemoveListener(OnClientJoinedCallback);
+            connectionManager.OnClientLostEvent.RemoveListener(OnClientLostCallback);
+
+            if (player_role == PlayerRole.Player || player_role == PlayerRole.Spectator)
+            {
+                connectionManager.OnServerLostEvent.RemoveListener(OnServerLostCallback);
+            }
+        }
+    }
+
+    void OnClientJoinedCallback(ulong client_id)
+    {
+
+    }
+
+    void OnClientLostCallback(ulong client_id)
+    {
+
+    }
+
+    void OnServerLostCallback()
+    {
+        
+    }
+    #endregion
+
+    #region Query Functions
+    
+    #endregion
 
     private static GameManager _Instance;
 
@@ -240,7 +357,9 @@ public class GameManager : MonoBehaviour
                 _Instance = GameObject.FindFirstObjectByType<GameManager>();
                 if (_Instance == null)
                 {
-                    Debug.LogError("Can't find GameManager in the scene!");
+                    Debug.Log("Can't find GameManager in the scene, will create a new one.");
+                    GameObject go = new GameObject();
+                    _Instance = go.AddComponent<GameManager>();
                 }
             }
             return _Instance;
