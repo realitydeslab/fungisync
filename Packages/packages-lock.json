@@ -256,6 +256,17 @@
       },
       "url": "https://packages.unity.com"
     },
+    "io.holokit.image-tracking-relocalization": {
+      "version": "file:io.holokit.image-tracking-relocalization",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.xr.arfoundation": "5.1.2",
+        "com.unity.xr.arkit": "5.1.2",
+        "com.unity.netcode.gameobjects": "1.8.1",
+        "com.unity.shadergraph": "14.0.10"
+      }
+    },
     "io.holokit.unity-sdk": {
       "version": "file:io.holokit.unity-sdk",
       "depth": 0,

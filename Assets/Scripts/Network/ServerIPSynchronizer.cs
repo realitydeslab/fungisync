@@ -24,7 +24,7 @@ public class ServerIPSynchronizer : MonoBehaviour
         oscReceiver = gameObject.GetComponent<OscEventReceiver>();
     }
 
-    public void StartReceivingServerIp(System.Action<string> action)
+    public void StartReceivingServerIp(System.Action<bool, string> action)
     {
         oscReceiver.enabled = true;
 
@@ -33,7 +33,7 @@ public class ServerIPSynchronizer : MonoBehaviour
         StartCoroutine(TryReceivingServerIp(action));
     }
 
-    IEnumerator TryReceivingServerIp(System.Action<string> action)
+    IEnumerator TryReceivingServerIp(System.Action<bool, string> action)
     {
         float start_time = Time.time;
         bool result = false;
@@ -51,17 +51,19 @@ public class ServerIPSynchronizer : MonoBehaviour
         }
 
         oscReceiver.enabled = false;
+
         if (result)
         {
             // successfully received the server ip
             Debug.Log($"[{this.GetType()}] Server Ip has been successfully sychronized. Server Ip:{serverIp}");
-            action?.Invoke(serverIp);
+            action?.Invoke(true, serverIp);
         }
         else
         {
             // failed to receive the server ip
-            Debug.Log($"[{this.GetType()}] Server Ip sychronization time out.");
-            action?.Invoke("");
+            string msg = "Server Ip sychronization time out.";
+            Debug.Log($"[{this.GetType()}] {msg}");
+            action?.Invoke(false, msg);
         }
     }
 
