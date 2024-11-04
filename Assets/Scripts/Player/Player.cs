@@ -59,8 +59,13 @@ public class Player : NetworkBehaviour
 
     float effectChangeProtectionTime = 5;
 
+
     float maxThreshold = 1; // Maximum distance thresold within which will blend effect
     float minThreshold = 0.2f; // Minimum distance threshold within which will be considered as same place
+
+    int handshakeFrameCount = 0;
+    int handshakeFrameThreshold = 60;
+
 
     void Awake()
     {
@@ -89,8 +94,7 @@ public class Player : NetworkBehaviour
             return;
 
         // If it's in Player Mode and has passed 5 seconds since last effect change
-        if(role.Value == PlayerRole.Player
-            && Time.time - lastChangeEffectTime > effectChangeProtectionTime)
+        if(role.Value == PlayerRole.Player)// && Time.time - lastChangeEffectTime > effectChangeProtectionTime)
         {
             float min_dis = float.MaxValue;
             Player nearest_player = null;
@@ -103,23 +107,63 @@ public class Player : NetworkBehaviour
                 // Set that player's effect as target effect
                 SetTargetEffect(nearest_player.currentEffectIndex.Value);
 
+                // Falloff
                 float max_lerp = 1 - Mathf.SmoothStep(minThreshold, maxThreshold, min_dis);
                 float lerp_value = Mathf.Min(effectLerp.Value + Time.deltaTime * blendingSpeed, max_lerp);
 
-                effectLerp.Value = lerp_value;
-                if(effectLerp.Value > 1)
+                if (lerp_value > 1)
                 {
+                    lerp_value = 1;
+                }
 
+                effectLerp.Value = lerp_value;
+
+                // Handshake timer
+                if(min_dis < minThreshold)
+                {
+                    handshakeFrameCount++;
+                    if(handshakeFrameCount > handshakeFrameThreshold)
+                    {
+                        // Handshake finished
+                    }
+                }
+                else
+                {
+                    handshakeFrameCount--;
+                    if(handshakeFrameCount < 0)
+                    {
+                        handshakeFrameCount = 0;
+                    }
                 }
             }
             else
             {
+                float lerp_value = effectLerp.Value - Time.deltaTime * blendingSpeed;                
 
+                if (lerp_value < 0)
+                {
+                    lerp_value = 0;
+
+                    ClearTargetEffect();
+                }
+
+                effectLerp.Value = lerp_value;
+
+                handshakeFrameCount--;
+                if (handshakeFrameCount < 0)
+                {
+                    handshakeFrameCount = 0;
+                }
             }
 
-            
+            // UpdateEffect()
         }
 
+
+        if(role.Value == PlayerRole.Spectator || role.Value == PlayerRole.Host)
+        {
+            // UpdateEffect()
+        }
     }
 
     void CalculatePositionAndOrientation(ref float min_dis, ref Player nearest_player)
@@ -145,10 +189,6 @@ public class Player : NetworkBehaviour
         }
     }
 
-    void UpdateBlendingEffect(float min_dis, Player nearest_player)
-    {
-        
-    }
 
     /// <summary>
     /// Return true if both people's hands are visible
@@ -243,6 +283,11 @@ public class Player : NetworkBehaviour
     void SetTargetEffect(int effect_index)
     {
         targetEffectIndex.Value = effect_index;
+    }
+
+    void ClearTargetEffect()
+    {
+        SetTargetEffect(-1);
     }
 
     void ChangeEffect(int index)
