@@ -77,23 +77,23 @@ public class PlayerManager : MonoBehaviour
     }
 
 
-    protected static PlayerManager _Instance;
+    //private static PlayerManager _Instance;
 
-    public static PlayerManager Instance
-    {
-        get
-        {
-            if (_Instance == null)
-            {
-                _Instance = GameObject.FindFirstObjectByType<PlayerManager>();
-                if (_Instance == null)
-                {
-                    Debug.Log("Can't find PlayerManager in the scene, will create a new one.");
-                    GameObject go = new GameObject();
-                    _Instance = go.AddComponent<PlayerManager>();
-                }
-            }
-            return _Instance;
-        }
-    }
+    //public static PlayerManager Instance
+    //{
+    //    get
+    //    {
+    //        if (_Instance == null)
+    //        {
+    //            _Instance = GameObject.FindFirstObjectByType<PlayerManager>();
+    //            if (_Instance == null)
+    //            {
+    //                Debug.Log("Can't find PlayerManager in the scene, will create a new one.");
+    //                GameObject go = new GameObject();
+    //                _Instance = go.AddComponent<PlayerManager>();
+    //            }
+    //        }
+    //        return _Instance;
+    //    }
+    //}
 }

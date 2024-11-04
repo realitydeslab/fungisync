@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EffectManager : MonoBehaviour
+public class Effect : EffectBase
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -11,13 +11,6 @@ public class EffectManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CheckPlayerOrientationAndDistance();
-    }
-
-    void CheckPlayerOrientationAndDistance()
-    {
-        // if close enough, switch effect
-
-        // 
+        
     }
 }
