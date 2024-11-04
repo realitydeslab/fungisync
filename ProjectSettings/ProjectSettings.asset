@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: Holo Interactive
-  productName: MycoSync
+  productName: FungiSync
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -170,7 +170,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.UnityTechnologies.com.unity.template.urpblank
     Standalone: com.Unity-Technologies.com.unity.template.urp-blank
-    iPhone: org.realitydeslab.mycosync
+    iPhone: org.realitydeslab.fungisync
   buildNumber:
     Standalone: 0
     VisionOS: 0

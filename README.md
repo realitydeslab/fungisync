@@ -1,1 +1,1 @@
-# MycoSync
+# FungiSync

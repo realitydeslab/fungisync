@@ -21,7 +21,7 @@ EditorBuildSettings:
     path: Assets/Samples/HoloKit Unity SDK/0.5.1/Hand Tracking/Scenes/HandTracking.unity
     guid: eb82d7165144449f48dc359f22dc9c83
   - enabled: 1
-    path: Assets/Scenes/MycoSync.unity
+    path: Assets/Scenes/FungiSync.unity
     guid: dcd06bf06d99d4dfe9d0b97fdbee3556
   m_configObjects:
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 88cde986a78ce4c379f8237891e7a00e, type: 2}
