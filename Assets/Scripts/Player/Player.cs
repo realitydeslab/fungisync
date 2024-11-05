@@ -69,7 +69,7 @@ public class Player : NetworkBehaviour
     float lastChangeEffectTime = 0;
     float effectChangeProtectionTime = 5;
 
-    float faceToFaceAngleThreshold = 100; // angle above which would be consider as face to face
+    float viewAngleThreshold = 60; // Below this angle, it is within the field of view
 
     float maxDistanceThreshold = 1; // Maximum distance thresold within which will blend effect
     float minDistanceThreshold = 0.2f; // Minimum distance threshold within which will be considered as same place
@@ -171,6 +171,9 @@ public class Player : NetworkBehaviour
             }
 
             // UpdateEffect()
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Effect Count", effectManager.EffectCount.ToString());
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Current Effect", currentEffectIndex.Value.ToString());
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Target Effect", targetEffectIndex.Value.ToString());
 
             Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Player Count", playerManager.PlayerList.Count.ToString());
             Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Nearest Player", nearest_player == null ? "Null" : nearest_player.OwnerClientId.ToString());
@@ -195,29 +198,15 @@ public class Player : NetworkBehaviour
 
             ////////////////////////////////////
             // Logic 1#
-            // Both people's hands must be visible
-            // Two people must face to face
+            // Both people's hands must be visible            
             if (IsHandVisible(player.Value) == false)
                 continue;
 
-            // Both people's hands must be visible
+            // Two people must face to face
             if (IsFaceToFace(player.Value) == false)
                 continue;
 
             float distance = distance = Vector3.Distance(player.Value.Hand.position, hand.position);
-
-            ////////////////////////////////////
-            // Logic 2#
-            // Find people who is nearest to interact with
-            //float distance = float.MaxValue;
-            //if(IsHandVisible(player.Value))
-            //{
-            //    distance = Vector3.Distance(player.Value.Hand.position, hand.position);
-            //}
-            //else
-            //{
-            //    distance = Vector3.Distance(player.Value.Body.position, body.position);
-            //}                
 
             if (distance < min_dis)
             {
@@ -250,11 +239,37 @@ public class Player : NetworkBehaviour
         if (player.Body == null || body == null)
             return false;
 
-        float angle = Vector3.Angle(player.body.forward, body.forward);
+        float angle_other_to_self = GetViewAngle(this, player.Body.position);
 
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Angle with {player.OwnerClientId}", angle.ToString());
+        float angle_self_to_other = GetViewAngle(player, body.position);
 
-        return angle > faceToFaceAngleThreshold;
+        bool result = angle_other_to_self < viewAngleThreshold && angle_self_to_other < viewAngleThreshold;
+
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Angle Player {player.OwnerClientId} to me", angle_other_to_self.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Angle me to Player {player.OwnerClientId}", angle_self_to_other.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"IsFaceToFace", result.ToString());
+
+        return result;
+    }
+
+    float GetViewAngle(Player player, Vector3 pos)
+    {
+        if (player.Body == null)
+            return -1;
+
+        float angle = Vector3.Angle(player.Body.forward, pos - player.Body.position);
+
+        return angle;
+    }
+
+    bool IsInsideView(Player player)
+    {
+        if (player.Body == null || body == null)
+            return false;
+
+        float angle = Vector3.Angle(body.forward, player.Body.position - body.position);
+
+        return angle < viewAngleThreshold;
     }
 
     public override void OnNetworkSpawn()
@@ -303,7 +318,7 @@ public class Player : NetworkBehaviour
     {
         Debug.Log($"[{this.GetType()}] Initialize Effect");
 
-        int effect_index = Random.Range(0, effectManager.EffectCount);
+        int effect_index = (int)OwnerClientId % effectManager.EffectCount; //Random.Range(0, effectManager.EffectCount);
 
         SetEffect(effect_index);
 
