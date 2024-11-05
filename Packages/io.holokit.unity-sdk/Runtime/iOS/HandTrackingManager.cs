@@ -116,12 +116,17 @@ namespace HoloKit.iOS
         {
             if (enabled)
             {
+                Debug.Log($"[{this.GetType()}] Before ProcessCurrentFrame3D()");
+
                 m_HandPoseDetector.ProcessCurrentFrame3D();
+
+                Debug.Log($"[{this.GetType()}] After ProcessCurrentFrame3D()");
             }
         }
 
         private void OnHandPoseUpdated()
         {
+            Debug.Log($"[{this.GetType()}] m_HandJoints.Count:{m_HandJoints.Count}, m_HandPoseDetector.HandCount:{m_HandPoseDetector.HandCount}, m_HandPoseDetector.HandPoses3D.Count:{m_HandPoseDetector.HandPoses3D.Count}");
             for (int i = 0; i < m_HandJoints.Count; i++)
             {
                 if (i < m_HandPoseDetector.HandCount)
@@ -142,6 +147,7 @@ namespace HoloKit.iOS
 
         private void OnHandPoseLost()
         {
+            Debug.Log($"[{this.GetType()}]m_Hands.Count:{m_Hands.Count}");
             foreach (var hand in m_Hands)
             {
                 hand.SetActive(false);

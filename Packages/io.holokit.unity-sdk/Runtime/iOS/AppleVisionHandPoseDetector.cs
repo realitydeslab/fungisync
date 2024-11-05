@@ -78,7 +78,18 @@ namespace HoloKit.iOS
 
         public void ProcessCurrentFrame3D()
         {
-            ProcessCurrentFrame3D(m_Ptr);
+            
+            try
+            {
+                Debug.Log("666. " + m_Ptr);
+                ProcessCurrentFrame3D(m_Ptr);
+                Debug.Log("777");
+            }
+            catch(Exception e)
+            {
+                Debug.Log("Catch Exception:" + e.ToString());
+            }
+            
         }
 
         public void Dispose()
@@ -106,6 +117,7 @@ namespace HoloKit.iOS
         [AOT.MonoPInvokeCallback(typeof(Action<IntPtr, int, IntPtr, IntPtr, IntPtr>))]
         static void OnHandPoseUpdatedCallback(IntPtr detectorPtr, int handCount, IntPtr results2DPtr, IntPtr results3DPtr, IntPtr confidencesPtr)
         {
+            Debug.Log($"111 handCount:{handCount}");
             if (s_Detectors.TryGetValue(detectorPtr, out AppleVisionHandPoseDetector detector))
             {
                 if (handCount == 0)
@@ -119,6 +131,7 @@ namespace HoloKit.iOS
                 }
                 detector.m_HandCount = handCount;
 
+                Debug.Log($"222");
                 if (results2DPtr != IntPtr.Zero)
                 {
                     int length = 2 * 21 * handCount;
@@ -133,6 +146,7 @@ namespace HoloKit.iOS
                     }
                 }
 
+                Debug.Log($"333");
                 if (results3DPtr != IntPtr.Zero)
                 {
                     int length = 3 * 21 * handCount;
@@ -147,6 +161,7 @@ namespace HoloKit.iOS
                     }
                 }
 
+                Debug.Log($"444");
                 if (confidencesPtr != IntPtr.Zero)
                 {
                     int length = 21 * handCount;
@@ -160,7 +175,8 @@ namespace HoloKit.iOS
                         }
                     }
                 }
-                
+
+                Debug.Log($"555");
                 detector.OnHandPoseUpdated?.Invoke();
             }
         }

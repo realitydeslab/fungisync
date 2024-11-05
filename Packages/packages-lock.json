@@ -175,6 +175,14 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.textmeshpro": {
+      "version": "3.0.7",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.ugui": "2.0.0"
+      }
+    },
     "com.unity.transport": {
       "version": "2.3.0",
       "depth": 1,
@@ -256,6 +264,15 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.yuchen.ingame-console": {
+      "version": "https://github.com/yuchenz27/unity-ingame-console.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.textmeshpro": "3.0.7"
+      },
+      "hash": "ee05a98bb867d6bdbe6cc67951540230f9ef9528"
+    },
     "io.holokit.image-tracking-relocalization": {
       "version": "file:io.holokit.image-tracking-relocalization",
       "depth": 0,
@@ -281,6 +298,13 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
+    },
+    "xiaobo.unity.toolkit.helper": {
+      "version": "https://github.com/agalloch21/unity-toolkit-helper.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "e20175aa33f615a44c86d80323f97a69f4d10d43"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

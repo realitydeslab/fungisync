@@ -10,7 +10,7 @@ namespace HoloKit.ColocatedMultiplayerBoilerplate
 {
     public class TrackedImagePoseTransformer : MonoBehaviour
     {
-        public Vector3 worldOriginPosition;
+        [SerializeField] Vector3 worldOriginPosition = Vector3.zero;
         [SerializeField] private WorldOriginResetter m_WorldOriginResetter;
 
         public void OnTrackedImageStablized(Vector3 position, Quaternion rotation)

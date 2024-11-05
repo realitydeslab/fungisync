@@ -227,6 +227,9 @@ public class GameManager : MonoBehaviour
         relocalizationStablizer.IsRelocalizing = true;
 #else
         OnFinishRelocalization(Vector3.zero, Quaternion.identity, action);
+
+        // Rotate body by 90 degrees so the fake people representing unity editor can turn around to face real player holding phones
+        //OnFinishRelocalization(Vector3.zero, Quaternion.AngleAxis(90, Vector3.up), action);
 #endif
     }
 
@@ -242,8 +245,19 @@ public class GameManager : MonoBehaviour
     void OnFinishRelocalization(Vector3 position, Quaternion rotation, System.Action action)
     {
 #if !UNITY_EDITOR
-            //relocalizationStablizer.OnTrackedImagePoseStablized.RemoveAllListeners();
+        HoloKit.ColocatedMultiplayerBoilerplate.TrackedImagePoseTransformer trackedImagePoseTransformer;
+        trackedImagePoseTransformer = FindFirstObjectByType<HoloKit.ColocatedMultiplayerBoilerplate.TrackedImagePoseTransformer>();
+
+        if(trackedImagePoseTransformer == null)
+        {
+            Debug.LogError($"[{this.GetType()}] Can't find TrackedImagePoseTransformer.");
+        }
+        else
+        {
+            trackedImagePoseTransformer.OnTrackedImageStablized(position, rotation);
+        }
 #endif
+
         action?.Invoke();
     }
 
@@ -255,9 +269,9 @@ public class GameManager : MonoBehaviour
             return 0;
     }
 
-    #endregion
+#endregion
 
-    #region Role
+#region Role
     void SetRole(GameMode game_mode, PlayerRole player_role)
     {
         // register callback
@@ -340,11 +354,11 @@ public class GameManager : MonoBehaviour
     {
         
     }
-    #endregion
+#endregion
 
-    #region Query Functions
+#region Query Functions
     
-    #endregion
+#endregion
 
     private static GameManager _Instance;
 

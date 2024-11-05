@@ -41,8 +41,19 @@ public class Player : NetworkBehaviour
 {
 
     public NetworkVariable<PlayerRole> role = new NetworkVariable<PlayerRole>(PlayerRole.Player, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    /// <summary>
+    /// Own effect index
+    /// </summary>
     public NetworkVariable<int> currentEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    /// <summary>
+    /// target effect index which blending towards
+    /// </summary>
     public NetworkVariable<int> targetEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    /// <summary>
+    /// Lerp value between own effect and target effect
+    /// 0 - fully own effect
+    /// 1 - fully target effect
+    /// </summary>
     public NetworkVariable<float> effectLerp = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     PlayerManager playerManager;
@@ -56,15 +67,17 @@ public class Player : NetworkBehaviour
     float blendingSpeed = 1;
     float blendingDirection = 0;
     float lastChangeEffectTime = 0;
-
     float effectChangeProtectionTime = 5;
 
+    float faceToFaceAngleThreshold = 100; // angle above which would be consider as face to face
 
-    float maxThreshold = 1; // Maximum distance thresold within which will blend effect
-    float minThreshold = 0.2f; // Minimum distance threshold within which will be considered as same place
+    float maxDistanceThreshold = 1; // Maximum distance thresold within which will blend effect
+    float minDistanceThreshold = 0.2f; // Minimum distance threshold within which will be considered as same place
 
     int handshakeFrameCount = 0;
     int handshakeFrameThreshold = 60;
+
+    
 
 
     void Awake()
@@ -102,13 +115,13 @@ public class Player : NetworkBehaviour
             CalculatePositionAndOrientation(ref min_dis, ref nearest_player);
 
             // If someone is near            
-            if (nearest_player != null && min_dis < maxThreshold)
+            if (nearest_player != null && min_dis < maxDistanceThreshold)
             {
                 // Set that player's effect as target effect
                 SetTargetEffect(nearest_player.currentEffectIndex.Value);
 
                 // Falloff
-                float max_lerp = 1 - Mathf.SmoothStep(minThreshold, maxThreshold, min_dis);
+                float max_lerp = Utilities.Remap(min_dis, minDistanceThreshold, maxDistanceThreshold, 1, 0, need_clamp:true);
                 float lerp_value = Mathf.Min(effectLerp.Value + Time.deltaTime * blendingSpeed, max_lerp);
 
                 if (lerp_value > 1)
@@ -119,11 +132,12 @@ public class Player : NetworkBehaviour
                 effectLerp.Value = lerp_value;
 
                 // Handshake timer
-                if(min_dis < minThreshold)
+                if(min_dis < minDistanceThreshold)
                 {
                     handshakeFrameCount++;
                     if(handshakeFrameCount > handshakeFrameThreshold)
                     {
+                        handshakeFrameCount = handshakeFrameThreshold;
                         // Handshake finished
                     }
                 }
@@ -157,6 +171,12 @@ public class Player : NetworkBehaviour
             }
 
             // UpdateEffect()
+
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Player Count", playerManager.PlayerList.Count.ToString());
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Nearest Player", nearest_player == null ? "Null" : nearest_player.OwnerClientId.ToString());
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Distance", nearest_player == null ? "Null" : min_dis.ToString());
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Lerp", effectLerp.Value.ToString());
+            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("HandshakeFrameCount", handshakeFrameCount.ToString());
         }
 
 
@@ -173,15 +193,33 @@ public class Player : NetworkBehaviour
             if (player.Key == NetworkManager.Singleton.LocalClientId)
                 continue;
 
+            ////////////////////////////////////
+            // Logic 1#
+            // Both people's hands must be visible
+            // Two people must face to face
             if (IsHandVisible(player.Value) == false)
                 continue;
 
+            // Both people's hands must be visible
             if (IsFaceToFace(player.Value) == false)
                 continue;
 
-            float distance = Vector3.Distance(player.Value.Hand.position, hand.position);
+            float distance = distance = Vector3.Distance(player.Value.Hand.position, hand.position);
 
-            if(distance < min_dis)
+            ////////////////////////////////////
+            // Logic 2#
+            // Find people who is nearest to interact with
+            //float distance = float.MaxValue;
+            //if(IsHandVisible(player.Value))
+            //{
+            //    distance = Vector3.Distance(player.Value.Hand.position, hand.position);
+            //}
+            //else
+            //{
+            //    distance = Vector3.Distance(player.Value.Body.position, body.position);
+            //}                
+
+            if (distance < min_dis)
             {
                 min_dis = distance;
                 nearest_player = player.Value;
@@ -196,7 +234,9 @@ public class Player : NetworkBehaviour
     /// <param name="player"></param>
     /// <returns></returns>
     bool IsHandVisible(Player player)
-    { 
+    {
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Hand of {player.OwnerClientId}", player.Hand.position.ToString());
+
         return (player.Hand != null && player.Hand.position != Vector3.zero && hand != null && hand.position != Vector3.zero);
     }
 
@@ -211,7 +251,10 @@ public class Player : NetworkBehaviour
             return false;
 
         float angle = Vector3.Angle(player.body.forward, body.forward);
-        return angle > 150;
+
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Angle with {player.OwnerClientId}", angle.ToString());
+
+        return angle > faceToFaceAngleThreshold;
     }
 
     public override void OnNetworkSpawn()
