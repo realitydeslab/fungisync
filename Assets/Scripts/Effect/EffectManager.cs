@@ -4,8 +4,8 @@ using UnityEngine;
 public class EffectManager : MonoBehaviour
 {
 
-    Dictionary<string, EffectBase> effectList = new Dictionary<string, EffectBase>();
-    public Dictionary<string, EffectBase> EffectList { get => effectList; }
+    List<EffectBase> effectList = new List<EffectBase>();
+    public List<EffectBase> EffectList { get => effectList; }
 
     public int EffectCount { get => effectList.Count; }
 
@@ -22,7 +22,7 @@ public class EffectManager : MonoBehaviour
             }
             else
             {
-                effectList.Add(name, effect);
+                effectList.Add(effect);
             }
         }
     }
@@ -30,7 +30,7 @@ public class EffectManager : MonoBehaviour
 
     public void StartEffect(int effect_index)
     {
-        
+        effectList[effect_index].StartEffect();
     }
     
 }

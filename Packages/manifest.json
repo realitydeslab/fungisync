@@ -6,6 +6,8 @@
     "com.unity.postprocessing": "3.4.0",
     "com.unity.render-pipelines.universal": "17.0.3",
     "com.unity.ugui": "2.0.0",
+    "com.unity.visualeffectgraph": "17.0.3",
+    "com.unity.xr.arfoundation": "6.0.3",
     "com.unity.xr.arkit": "6.0.3",
     "com.yuchen.ingame-console": "https://github.com/yuchenz27/unity-ingame-console.git",
     "jp.keijiro.osc-jack": "2.0.0",

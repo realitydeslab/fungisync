@@ -4,6 +4,8 @@ using HoloKit;
 using HoloKit.ImageTrackingRelocalization;
 using Unity.Netcode;
 using System.Collections;
+using UnityEngine.XR.ARFoundation;
+using HoloKit.iOS;
 
 public enum GameMode
 {
@@ -44,6 +46,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] ServerIPSynchronizer serverIPSynchronizer;    
     [SerializeField] ImageTrackingStablizer relocalizationStablizer;
+    [SerializeField] ARMeshManager arMeshManager;
+    [SerializeField] HandTrackingManager handTrackingManager;
 
 
 
@@ -60,8 +64,8 @@ public class GameManager : MonoBehaviour
     #region Network Connection
     public void StartSinglePlayer(System.Action<bool, string> action)
     {
-        // Set role to singler player
-        SetRole(GameMode.SinglePlayer, PlayerRole.Player);        
+        // Start Game as singler player
+        StartGame(GameMode.SinglePlayer, PlayerRole.Player);
 
         // Update UI
         action?.Invoke(true, "");
@@ -73,8 +77,8 @@ public class GameManager : MonoBehaviour
         {     
             if (result == true)
             {
-                // Set role to player
-                SetRole(GameMode.MultiplePlayer, PlayerRole.Player);
+                // Start Game as player
+                StartGame(GameMode.MultiplePlayer, PlayerRole.Player);
             }
 
             // Update UI
@@ -88,8 +92,8 @@ public class GameManager : MonoBehaviour
         {
             if (result == true)
             {
-                // Set role to spectator
-                SetRole(GameMode.MultiplePlayer, PlayerRole.Spectator);
+                // Start Game as spectator
+                StartGame(GameMode.MultiplePlayer, PlayerRole.Spectator);
             }
 
             // Update UI
@@ -103,8 +107,8 @@ public class GameManager : MonoBehaviour
         {
             if (result == true)
             {
-                // Set role to host
-                SetRole(GameMode.MultiplePlayer, PlayerRole.Host);
+                // Start Game as host
+                StartGame(GameMode.MultiplePlayer, PlayerRole.Host);
             }
 
             // Update UI
@@ -195,12 +199,20 @@ public class GameManager : MonoBehaviour
         action?.Invoke(result, msg);
     }
 
-    
+    void StartGame(GameMode game_mode, PlayerRole player_role)
+    {
+        EnableARFunctions();
+
+        SetRole(game_mode, player_role);
+    }
 
     public void RestartGame(System.Action action)
     {
         // Shutdown network
         Shutdown();
+
+        // Disable ARFunctions
+        DisableARFunctions();
 
         // Reset Role
         ResetRole();
@@ -354,11 +366,30 @@ public class GameManager : MonoBehaviour
     {
         
     }
-#endregion
+    #endregion
 
-#region Query Functions
-    
-#endregion
+    void EnableARFunctions()
+    {
+        arMeshManager.enabled = true;
+#if !UNITY_EDITOR
+        handTrackingManager.enabled = true;
+#endif
+
+        // enable environmental probe
+    }
+
+    void DisableARFunctions()
+    {
+        arMeshManager.enabled = false;
+#if !UNITY_EDITOR
+        handTrackingManager.enabled = false;
+#endif
+        // disable environmental probe
+    }
+
+    #region Query Functions
+
+    #endregion
 
     private static GameManager _Instance;
 

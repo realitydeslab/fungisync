@@ -15,9 +15,11 @@ public class MeshToBufferConvertor : MonoBehaviour
 
     List<Vector3> listVertex;
     GraphicsBuffer bufferVertex;
+    public GraphicsBuffer VertexBuffer { get => bufferVertex; }
 
     List<Vector3> listNormal;
     GraphicsBuffer bufferNormal;
+    public GraphicsBuffer NormalBuffer { get => bufferNormal; }
 
     List<(float, int)> listMeshDistance = new List<(float, int)>();
     List<int> listRandomIndex = new List<int>();
@@ -50,9 +52,9 @@ public class MeshToBufferConvertor : MonoBehaviour
             return;
 
 
-        IList<MeshFilter> mesh_list = meshManager.meshes;
+        IList<MeshFilter> mesh_list = meshManager.meshes;        
 
-        if(mesh_list == null)
+        if (mesh_list == null)
         {
             listVertex.Clear();
             listNormal.Clear();
@@ -62,6 +64,8 @@ public class MeshToBufferConvertor : MonoBehaviour
 
             return;
         }
+
+        //Debug.Log($"mesh_list:{mesh_list.Count}");
 
 
         // 
@@ -131,6 +135,8 @@ public class MeshToBufferConvertor : MonoBehaviour
             }
             listMeshDistance.Sort((x, y) => x.Item1.CompareTo(y.Item1));
 
+            //Debug.Log($"listMeshDistance:{listMeshDistance.Count}");
+
 
             // push nearest to buffer
             for (int i = 0; i < listMeshDistance.Count; i++)
@@ -140,6 +146,10 @@ public class MeshToBufferConvertor : MonoBehaviour
 
                 listVertex.AddRange(mesh.sharedMesh.vertices);
                 listNormal.AddRange(mesh.sharedMesh.normals);
+
+                //Debug.Log($"listVertex 0:{mesh.sharedMesh.vertices[0]}");
+                //Debug.Log($"listVertex 1:{mesh.sharedMesh.vertices[1]}");
+
 
                 vertex_count += mesh.sharedMesh.vertexCount;
                 triangle_count += mesh.sharedMesh.triangles.Length / 3;
@@ -165,7 +175,9 @@ public class MeshToBufferConvertor : MonoBehaviour
 
         EnsureBufferCapacity(ref bufferNormal, listNormal.Count, BUFFER_STRIDE);
         bufferNormal.SetData(listNormal);
-        
+
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("VertexBufferCount", bufferVertex.count.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("NormalBufferCount", bufferNormal.count.ToString());
     }
 
     private void EnsureBufferCapacity(ref GraphicsBuffer buffer, int capacity, int stride)
