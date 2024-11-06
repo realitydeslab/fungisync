@@ -56,6 +56,8 @@ public class Player : NetworkBehaviour
     /// </summary>
     public NetworkVariable<float> effectLerp = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    int stackedTargetIndex = -1;
+
     PlayerManager playerManager;
     EffectManager effectManager;
 
@@ -96,6 +98,8 @@ public class Player : NetworkBehaviour
 
         body = transform.GetChild(0);
         hand = transform.GetChild(1);
+
+        Debug.Log("Awake");
     }
 
     void Update()
@@ -107,7 +111,7 @@ public class Player : NetworkBehaviour
             return;
 
         // If it's in Player Mode and has passed 5 seconds since last effect change
-        if(role.Value == PlayerRole.Player)// && Time.time - lastChangeEffectTime > effectChangeProtectionTime)
+        if(role.Value == PlayerRole.Player && Time.time - lastChangeEffectTime > effectChangeProtectionTime)
         {
             float min_dis = float.MaxValue;
             Player nearest_player = null;
@@ -117,7 +121,7 @@ public class Player : NetworkBehaviour
             // If someone is near            
             if (nearest_player != null && min_dis < maxDistanceThreshold)
             {
-                // Set that player's effect as target effect
+                // Set target effect with other player's effect index
                 SetTargetEffect(nearest_player.currentEffectIndex.Value);
 
                 // Falloff
@@ -135,10 +139,12 @@ public class Player : NetworkBehaviour
                 if(min_dis < minDistanceThreshold)
                 {
                     handshakeFrameCount++;
-                    if(handshakeFrameCount > handshakeFrameThreshold)
+
+                    // Handshake finished
+                    if (handshakeFrameCount > handshakeFrameThreshold)
                     {
-                        handshakeFrameCount = handshakeFrameThreshold;
-                        // Handshake finished
+                        handshakeFrameCount = 0;
+                        SwitchEffect();
                     }
                 }
                 else
@@ -224,7 +230,7 @@ public class Player : NetworkBehaviour
     /// <returns></returns>
     bool IsHandVisible(Player player)
     {
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Hand of {player.OwnerClientId}", player.Hand.position.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Hand of Player {player.OwnerClientId}", player.Hand.position.ToString());
 
         return (player.Hand != null && player.Hand.position != Vector3.zero && hand != null && hand.position != Vector3.zero);
     }
@@ -245,8 +251,8 @@ public class Player : NetworkBehaviour
 
         bool result = angle_other_to_self < viewAngleThreshold && angle_self_to_other < viewAngleThreshold;
 
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Angle Player {player.OwnerClientId} to me", angle_other_to_self.ToString());
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Angle me to Player {player.OwnerClientId}", angle_self_to_other.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"View Angle(Player {player.OwnerClientId} to me)", angle_other_to_self.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"View Angle(me to Player {player.OwnerClientId})", angle_self_to_other.ToString());
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"IsFaceToFace", result.ToString());
 
         return result;
@@ -292,6 +298,8 @@ public class Player : NetworkBehaviour
                 OnRoleSpecified(GameManager.Instance.GameMode, GameManager.Instance.PlayerRole);
             }
         }
+
+        Debug.Log("OnNetworkSpawn");
     }
 
     public override void OnNetworkDespawn()
@@ -305,6 +313,8 @@ public class Player : NetworkBehaviour
         {
             GameManager.Instance.OnRoleSpecified.RemoveListener(OnRoleSpecified);
         }
+
+        Debug.Log("OnNetworkDespawn");
     }
 
     void OnRoleSpecified(GameMode game_mode, PlayerRole player_role)
@@ -331,6 +341,8 @@ public class Player : NetworkBehaviour
 
     void SetEffect(int effect_index)
     {
+        if (effect_index < 0) return;
+
         lastChangeEffectTime = Time.time;
 
         currentEffectIndex.Value = effect_index;
@@ -340,11 +352,19 @@ public class Player : NetworkBehaviour
 
     void SetTargetEffect(int effect_index)
     {
+        // If handshake just starts
+        if (targetEffectIndex.Value == -1)
+        {
+            stackedTargetIndex = effect_index;
+        }
+
         targetEffectIndex.Value = effect_index;
     }
 
     void ClearTargetEffect()
     {
+        stackedTargetIndex = -1;
+
         SetTargetEffect(-1);
     }
 
@@ -353,8 +373,10 @@ public class Player : NetworkBehaviour
         Debug.Log($"[{this.GetType()}] Change Effect");
     }
 
-    void SwitchEffect(int index)
+    void SwitchEffect()
     {
+        SetEffect(stackedTargetIndex);
 
+        ClearTargetEffect();
     }
 }

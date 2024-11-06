@@ -65,7 +65,8 @@ public class MeshToBufferConvertor : MonoBehaviour
             return;
         }
 
-        //Debug.Log($"mesh_list:{mesh_list.Count}");
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Mesh Count:", mesh_list.Count.ToString());
+        Debug.Log($"mesh_list:{mesh_list.Count}");
 
 
         // 

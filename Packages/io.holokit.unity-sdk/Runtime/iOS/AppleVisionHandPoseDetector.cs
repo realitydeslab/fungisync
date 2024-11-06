@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARSubsystems;
+using System.Threading;
 
 namespace HoloKit.iOS
 {
@@ -44,6 +45,8 @@ namespace HoloKit.iOS
 
         static Dictionary<IntPtr, AppleVisionHandPoseDetector> s_Detectors = new();
 
+        private readonly object _lock = new object();
+
         public AppleVisionHandPoseDetector(MaxHandCount maxHandCount)
         {
             List<XRSessionSubsystem> xrSessionSubsystems = new();
@@ -78,18 +81,28 @@ namespace HoloKit.iOS
 
         public void ProcessCurrentFrame3D()
         {
-            
+            bool lockTaken = false;
             try
             {
-                Debug.Log("666. " + m_Ptr);
-                ProcessCurrentFrame3D(m_Ptr);
-                Debug.Log("777");
+                Monitor.TryEnter(_lock, TimeSpan.FromSeconds(5), ref lockTaken);
+                if (lockTaken)
+                {
+                    Debug.Log("666. " + m_Ptr);
+
+                    ProcessCurrentFrame3D(m_Ptr);
+
+                    Debug.Log("777");
+                    return ;
+                }
+                return ;
             }
-            catch(Exception e)
+            finally
             {
-                Debug.Log("Catch Exception:" + e.ToString());
-            }
-            
+                if (lockTaken)
+                {
+                    Monitor.Exit(_lock);
+                }
+            }            
         }
 
         public void Dispose()
@@ -117,7 +130,6 @@ namespace HoloKit.iOS
         [AOT.MonoPInvokeCallback(typeof(Action<IntPtr, int, IntPtr, IntPtr, IntPtr>))]
         static void OnHandPoseUpdatedCallback(IntPtr detectorPtr, int handCount, IntPtr results2DPtr, IntPtr results3DPtr, IntPtr confidencesPtr)
         {
-            Debug.Log($"111 handCount:{handCount}");
             if (s_Detectors.TryGetValue(detectorPtr, out AppleVisionHandPoseDetector detector))
             {
                 if (handCount == 0)
@@ -131,7 +143,6 @@ namespace HoloKit.iOS
                 }
                 detector.m_HandCount = handCount;
 
-                Debug.Log($"222");
                 if (results2DPtr != IntPtr.Zero)
                 {
                     int length = 2 * 21 * handCount;
@@ -146,7 +157,6 @@ namespace HoloKit.iOS
                     }
                 }
 
-                Debug.Log($"333");
                 if (results3DPtr != IntPtr.Zero)
                 {
                     int length = 3 * 21 * handCount;
@@ -161,7 +171,6 @@ namespace HoloKit.iOS
                     }
                 }
 
-                Debug.Log($"444");
                 if (confidencesPtr != IntPtr.Zero)
                 {
                     int length = 21 * handCount;
@@ -176,7 +185,6 @@ namespace HoloKit.iOS
                     }
                 }
 
-                Debug.Log($"555");
                 detector.OnHandPoseUpdated?.Invoke();
             }
         }
