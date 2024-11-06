@@ -74,6 +74,21 @@ public class PlayerManager : MonoBehaviour
                 Debug.Log($"[{ this.GetType()}] Player {client_id} Joined. Player Count:{playerList.Count}");
             }
         }
+
+        //
+        int debug_index = 0;
+        foreach (var player in playerList)
+        {
+            if (player.Value == null)
+            {
+                Debug.Log($"[{this.GetType()}] {debug_index} is Null!");
+            }
+            else
+            {
+                Debug.Log($"[{this.GetType()}] player {player.Value.OwnerClientId}: Body:{player.Value.Body == null}, Hand:{player.Value.Hand == null}");
+            }
+            debug_index++;
+        }
     }
 
 
