@@ -91,6 +91,10 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public void ResetPlayerList()
+    {
+        playerList.Clear();
+    }
 
     //private static PlayerManager _Instance;
 

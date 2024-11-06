@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] ServerIPSynchronizer serverIPSynchronizer;    
     [SerializeField] ImageTrackingStablizer relocalizationStablizer;
     [SerializeField] EnvironmentProbe environmentProbe;
+    [SerializeField] PlayerManager playerManager;
 
 
 
@@ -215,6 +216,9 @@ public class GameManager : MonoBehaviour
 
         // Reset Role
         ResetRole();
+
+        // Reset Player List
+        playerManager.ResetPlayerList();
 
         // Update UI
         action?.Invoke();

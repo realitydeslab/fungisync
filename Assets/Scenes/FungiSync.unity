@@ -6848,6 +6848,7 @@ MonoBehaviour:
   serverIPSynchronizer: {fileID: 530827140}
   relocalizationStablizer: {fileID: 1527079174}
   environmentProbe: {fileID: 2029210341}
+  playerManager: {fileID: 1306084813}
   OnRoleSpecified:
     m_PersistentCalls:
       m_Calls: []
