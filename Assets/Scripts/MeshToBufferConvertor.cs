@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.VFX;
 using UnityEngine.XR.ARFoundation;
 
 public class MeshToBufferConvertor : MonoBehaviour
@@ -13,9 +14,15 @@ public class MeshToBufferConvertor : MonoBehaviour
     [SerializeField] bool dynamicallyResizeBuffer = false;
     private const int BUFFER_STRIDE = 12; // 12 Bytes for a Vector3 (4,4,4)
 
+
+    [Header("Debug VFX")]
+    [SerializeField] bool debugMode = false;
+    [SerializeField] VisualEffect vfx;
+
     List<Vector3> listVertex;
     GraphicsBuffer bufferVertex;
     public GraphicsBuffer VertexBuffer { get => bufferVertex; }
+    public int VertexCount { get => listVertex == null ? 0 : listVertex.Count; }
 
     List<Vector3> listNormal;
     GraphicsBuffer bufferNormal;
@@ -44,8 +51,23 @@ public class MeshToBufferConvertor : MonoBehaviour
 
         listNormal = new List<Vector3>(bufferInitialCapacity);
         EnsureBufferCapacity(ref bufferNormal, bufferInitialCapacity, BUFFER_STRIDE);
+
+        if (vfx != null)
+            vfx.enabled = debugMode;
     }
 
+    //void OnEnable()
+    //{
+    //    if(meshManager != null)
+    //        meshManager.meshesChanged += UpdateBuffer;
+    //}
+    //void OnDisable()
+    //{
+    //    if (meshManager != null)
+    //        meshManager.meshesChanged -= UpdateBuffer;
+    //}
+
+    //void UpdateBuffer(ARMeshesChangedEventArgs args)
     void LateUpdate()
     {
         if (GameManager.Instance.GameMode == GameMode.Undefined || meshManager == null || trackedPoseDriver == null)
@@ -66,8 +88,6 @@ public class MeshToBufferConvertor : MonoBehaviour
         }
 
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Mesh Count:", mesh_list.Count.ToString());
-        Debug.Log($"mesh_list:{mesh_list.Count}");
-
 
         // 
         int mesh_count = mesh_list.Count;
@@ -136,9 +156,6 @@ public class MeshToBufferConvertor : MonoBehaviour
             }
             listMeshDistance.Sort((x, y) => x.Item1.CompareTo(y.Item1));
 
-            //Debug.Log($"listMeshDistance:{listMeshDistance.Count}");
-
-
             // push nearest to buffer
             for (int i = 0; i < listMeshDistance.Count; i++)
             {
@@ -147,10 +164,6 @@ public class MeshToBufferConvertor : MonoBehaviour
 
                 listVertex.AddRange(mesh.sharedMesh.vertices);
                 listNormal.AddRange(mesh.sharedMesh.normals);
-
-                //Debug.Log($"listVertex 0:{mesh.sharedMesh.vertices[0]}");
-                //Debug.Log($"listVertex 1:{mesh.sharedMesh.vertices[1]}");
-
 
                 vertex_count += mesh.sharedMesh.vertexCount;
                 triangle_count += mesh.sharedMesh.triangles.Length / 3;
@@ -178,7 +191,20 @@ public class MeshToBufferConvertor : MonoBehaviour
         bufferNormal.SetData(listNormal);
 
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("VertexBufferCount", bufferVertex.count.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("listVertex.Count", listVertex.Count.ToString());
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("NormalBufferCount", bufferNormal.count.ToString());
+
+        DebugVFX();
+    }
+
+    void DebugVFX()
+    {
+        if (debugMode == false || vfx == null)
+            return;
+
+        vfx.SetInt("VertexCount", VertexCount);
+        vfx.SetGraphicsBuffer("VertexBuffer", VertexBuffer);
+        vfx.SetGraphicsBuffer("NormalBuffer", NormalBuffer);
     }
 
     private void EnsureBufferCapacity(ref GraphicsBuffer buffer, int capacity, int stride)
@@ -186,7 +212,6 @@ public class MeshToBufferConvertor : MonoBehaviour
         // Reallocate new buffer only when null or capacity is not sufficient
         if (buffer == null || (dynamicallyResizeBuffer && buffer.count < capacity)) // remove dynamic allocating function
         {
-            //Debug.Log("Graphic Buffer reallocated!");
             // Buffer memory must be released
             buffer?.Release();
             // Vfx Graph uses structured buffer

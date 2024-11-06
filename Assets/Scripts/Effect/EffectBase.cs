@@ -83,6 +83,7 @@ public class EffectBase : MonoBehaviour
 
             if(needPushBuffer == true && meshToBufferConverter != null )
             {
+                vfx.SetInt("VertexCount", meshToBufferConverter.VertexCount);
                 if (meshToBufferConverter.VertexBuffer != null && vfx.HasGraphicsBuffer("VertexBuffer"))
                 {
                     vfx.SetGraphicsBuffer("VertexBuffer", meshToBufferConverter.VertexBuffer);

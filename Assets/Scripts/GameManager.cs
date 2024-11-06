@@ -46,8 +46,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] ServerIPSynchronizer serverIPSynchronizer;    
     [SerializeField] ImageTrackingStablizer relocalizationStablizer;
-    [SerializeField] ARMeshManager arMeshManager;
-    [SerializeField] HandTrackingManager handTrackingManager;
+    [SerializeField] EnvironmentProbe environmentProbe;
 
 
 
@@ -201,7 +200,7 @@ public class GameManager : MonoBehaviour
 
     void StartGame(GameMode game_mode, PlayerRole player_role)
     {
-        EnableARFunctions();
+        environmentProbe.EnableEnvironmentProbe();
 
         SetRole(game_mode, player_role);
     }
@@ -211,8 +210,8 @@ public class GameManager : MonoBehaviour
         // Shutdown network
         Shutdown();
 
-        // Disable ARFunctions
-        DisableARFunctions();
+        // Disable EnvironmentProbe
+        environmentProbe.DisableEnvironmentProbe(); 
 
         // Reset Role
         ResetRole();
@@ -368,24 +367,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    void EnableARFunctions()
-    {
-        arMeshManager.enabled = true;
-#if !UNITY_EDITOR
-        handTrackingManager.enabled = true;
-#endif
-
-        // enable environmental probe
-    }
-
-    void DisableARFunctions()
-    {
-        arMeshManager.enabled = false;
-#if !UNITY_EDITOR
-        handTrackingManager.enabled = false;
-#endif
-        // disable environmental probe
-    }
+    
 
     #region Query Functions
 

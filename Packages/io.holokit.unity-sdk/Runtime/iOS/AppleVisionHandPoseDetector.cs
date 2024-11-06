@@ -87,11 +87,11 @@ namespace HoloKit.iOS
                 Monitor.TryEnter(_lock, TimeSpan.FromSeconds(5), ref lockTaken);
                 if (lockTaken)
                 {
-                    Debug.Log("666. " + m_Ptr);
+                    //Debug.Log("666. " + m_Ptr);
 
                     ProcessCurrentFrame3D(m_Ptr);
 
-                    Debug.Log("777");
+                    //Debug.Log("777");
                     return ;
                 }
                 return ;
