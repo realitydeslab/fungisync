@@ -139,7 +139,7 @@ public class MeshToBufferConvertor : MonoBehaviour
                 min_pos = Vector3.Min(min_pos, mesh.sharedMesh.bounds.min);
                 max_pos = Vector3.Max(max_pos, mesh.sharedMesh.bounds.max);
 
-                Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Mesh{i}", $"{mesh.sharedMesh.bounds.center}");
+                //Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Mesh{i}", $"{mesh.sharedMesh.bounds.center}");
             }
         }
 

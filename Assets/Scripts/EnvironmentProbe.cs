@@ -9,10 +9,14 @@ public class EnvironmentProbe : MonoBehaviour
     [SerializeField] HandTrackingManager handTrackingManager;
 
     [SerializeField] DepthImageProcessor depthImageProcessor;
+    public DepthImageProcessor DepthImageProcessor { get => depthImageProcessor; }
     [SerializeField] MeshToBufferConvertor meshToBufferConvertor;
+    public MeshToBufferConvertor MeshToBufferConvertor { get => meshToBufferConvertor; }
+    [SerializeField] MeshingRaycaster meshingRaycaster ;
+    public MeshingRaycaster MeshingRaycaster { get => meshingRaycaster; }
 
 
-// XR Environment running in Editor mode has to be enabled at start to correctly recognize meshes.
+    // XR Environment running in Editor mode has to be enabled at start to correctly recognize meshes.
 
     void Awake()
     {
@@ -43,6 +47,8 @@ public class EnvironmentProbe : MonoBehaviour
         depthImageProcessor.enabled = true;
 
         meshToBufferConvertor.enabled = true;
+
+        meshingRaycaster.enabled = true;
     }
 
     public void DisableEnvironmentProbe()
@@ -54,6 +60,8 @@ public class EnvironmentProbe : MonoBehaviour
         depthImageProcessor.enabled = false;
 
         meshToBufferConvertor.enabled = false;
+
+        meshingRaycaster.enabled = false;
 
     }
 }

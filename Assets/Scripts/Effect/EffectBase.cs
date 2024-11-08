@@ -13,9 +13,13 @@ public class EffectBase : MonoBehaviour
     protected Player player;
 
     protected bool needPushHumanStencil = false;
-    DepthImageProcessor depthImageProcessor;
+    //DepthImageProcessor depthImageProcessor;
     protected bool needPushBuffer = false;
-    MeshToBufferConvertor meshToBufferConverter;
+    //MeshToBufferConvertor meshToBufferConverter;
+    protected bool needPushHitPoint = false;
+    //MeshingRaycaster meshingRaycaster;
+
+    EnvironmentProbe environmentProbe;
 
     protected int effectIndex = -1;
 
@@ -34,17 +38,30 @@ public class EffectBase : MonoBehaviour
 
     void Awake()
     {
-        depthImageProcessor = FindFirstObjectByType<DepthImageProcessor>();
-        if(depthImageProcessor == null)
+        //depthImageProcessor = FindFirstObjectByType<DepthImageProcessor>();
+        //if(depthImageProcessor == null)
+        //{
+        //    Debug.LogError($"[{this.GetType()}] Can't find DepthImageProcessor");
+        //}
+
+        //meshToBufferConverter = FindFirstObjectByType<MeshToBufferConvertor>();
+        //if (meshToBufferConverter == null)
+        //{
+        //    Debug.LogError($"[{this.GetType()}] Can't find MeshToBufferConverter");
+        //}
+        //meshingRaycaster = FindFirstObjectByType<MeshingRaycaster>();
+        //if (meshingRaycaster == null)
+        //{
+        //    Debug.LogError($"[{this.GetType()}] Can't find MeshingRaycaster");
+        //}
+
+
+        environmentProbe = FindFirstObjectByType<EnvironmentProbe>();
+        if(environmentProbe == null)
         {
-            Debug.LogError($"[{this.GetType()}] Can't find DepthImageProcessor");
+            Debug.LogError($"[{this.GetType()}] Can't find EnvironmentProbe");
         }
 
-        meshToBufferConverter = FindFirstObjectByType<MeshToBufferConvertor>();
-        if (meshToBufferConverter == null)
-        {
-            Debug.LogError($"[{this.GetType()}] Can't find MeshToBufferConverter");
-        }
 
         effectIndex = transform.GetSiblingIndex();
 
@@ -121,6 +138,8 @@ public class EffectBase : MonoBehaviour
             vfx.SetVector3("Player_position", player.Body.position);
             vfx.SetVector3("Player_angles", player.Body.eulerAngles);
 
+
+            DepthImageProcessor depthImageProcessor = environmentProbe.DepthImageProcessor;
             if (needPushHumanStencil == true && depthImageProcessor != null && depthImageProcessor.HumanStencilTexture != null)
             {
                 Texture2D human_tex = depthImageProcessor.HumanStencilTexture;
@@ -129,6 +148,7 @@ public class EffectBase : MonoBehaviour
                 if (vfx.HasMatrix4x4("HumanStencilTextureMatrix")) vfx.SetMatrix4x4("HumanStencilTextureMatrix", depthImageProcessor.DisplayRotatioMatrix);
             }
 
+            MeshToBufferConvertor meshToBufferConverter = environmentProbe.MeshToBufferConvertor;
             if (needPushBuffer == true && meshToBufferConverter != null)
             {
                 vfx.SetInt("VertexCount", meshToBufferConverter.VertexCount);
@@ -139,6 +159,21 @@ public class EffectBase : MonoBehaviour
                 if (meshToBufferConverter.NormalBuffer != null && vfx.HasGraphicsBuffer("NormalBuffer"))
                 {
                     vfx.SetGraphicsBuffer("NormalBuffer", meshToBufferConverter.NormalBuffer);
+                }
+            }
+
+
+            MeshingRaycaster meshingRaycaster = environmentProbe.MeshingRaycaster;
+            if (needPushHitPoint && meshingRaycaster != null)
+            {
+                vfx.SetInt("DidHit", meshingRaycaster.DidHit ? 1 : 0);
+                if (meshingRaycaster.HitPosition != null && vfx.HasGraphicsBuffer("HitPosition"))
+                {
+                    vfx.SetVector3("HitPosition", meshingRaycaster.HitPosition);
+                }
+                if (meshingRaycaster.HitNormal != null && vfx.HasGraphicsBuffer("HitNormal"))
+                {
+                    vfx.SetVector3("HitNormal", meshingRaycaster.HitNormal);
                 }
             }
         }
