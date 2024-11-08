@@ -251,9 +251,7 @@ public class Player : NetworkBehaviour
 
         bool result = angle_other_to_self < viewAngleThreshold && angle_self_to_other < viewAngleThreshold;
 
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"View Angle(Player {player.OwnerClientId} to me)", angle_other_to_self.ToString());
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"View Angle(me to Player {player.OwnerClientId})", angle_self_to_other.ToString());
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"IsFaceToFace", result.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"IsFaceToFace", $"({angle_other_to_self.ToString("0.00")}, {angle_self_to_other.ToString("0.00")}+{result.ToString()})");
 
         return result;
     }

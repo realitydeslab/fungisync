@@ -47,6 +47,11 @@ public class EffectBase : MonoBehaviour
         }
 
         effectIndex = transform.GetSiblingIndex();
+
+        if (vfx != null)
+        {
+            vfx.enabled = false;
+        }
     }
 
     public virtual void StartEffect()
@@ -55,6 +60,8 @@ public class EffectBase : MonoBehaviour
 
         isOn = true;
 
+        vfx.enabled = true;
+
         marchingDistance = 0;
         effectRange = Vector2.zero;
     }
@@ -62,6 +69,8 @@ public class EffectBase : MonoBehaviour
     public virtual void StopEffect()
     {
         isOn = false;
+
+        vfx.enabled = false;
 
         marchingDistance = 0;
         effectRange = Vector2.zero;
