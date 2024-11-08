@@ -23,7 +23,7 @@ Before: When two users come within 2 meter, a spore particle stream will exchang
 
 During handshakes: The blending effect reaches its maximum. Participants can synchronize creatively using various finger movements and secret handshakes. These gestures introduce randomness to the blending effect. (50% self, 50% other)
 
-After handshakes: A portion of the other participant's effect remains. (80% self, 20% other)
+After handshakes: The finished swap of the other participant's effect. (0% original self, 100% original other)
 
 ## Implementation
 
