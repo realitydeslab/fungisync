@@ -13,6 +13,7 @@ public class LocalPlayerSynchronizer : MonoBehaviour
 
     HandTrackingManager handTrackingManager;
     ARCameraManager arCameraManager;
+    Camera camera;
 
     void Awake()
     {
@@ -20,6 +21,10 @@ public class LocalPlayerSynchronizer : MonoBehaviour
         if (arCameraManager == null)
         {
             Debug.LogError($"[{this.GetType()}] Can't find ARCameraManager.");
+        }
+        else
+        {
+            camera = arCameraManager.gameObject.GetComponent<Camera>();
         }
 
         handTrackingManager = FindFirstObjectByType<HandTrackingManager>();
@@ -40,26 +45,40 @@ public class LocalPlayerSynchronizer : MonoBehaviour
 
 
 
-        if (arCameraManager != null)
+        if (arCameraManager != null && camera != null)
         {
             Transform body = NetworkManager.Singleton.LocalClient.PlayerObject.transform.GetChild(0);
 
 #if !UNITY_EDITOR
             body.SetPositionAndRotation(arCameraManager.transform.position, arCameraManager.transform.rotation);
 #else
+            arCameraManager.transform.SetPositionAndRotation(fakeBodyPosition, Quaternion.Euler(fakeBodyRotation));
             body.SetPositionAndRotation(fakeBodyPosition, Quaternion.Euler(fakeBodyRotation));
 #endif
             Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Body", body.position.ToString());
         }
 
-        if (handTrackingManager != null)
+        if (handTrackingManager != null && camera != null)
         {
             Transform hand = NetworkManager.Singleton.LocalClient.PlayerObject.transform.GetChild(1);
+
+            Vector3 temp_hand_pos = Vector3.zero;
 #if !UNITY_EDITOR
-            hand.position = handTrackingManager.GetHandJointPosition(0, JointName.MiddleMCP);
+            temp_hand_pos = handTrackingManager.GetHandJointPosition(0, JointName.MiddleMCP);
 #else
-            hand.position = fakeHandPosition;
+            temp_hand_pos = fakeHandPosition;
 #endif
+            Vector3 hand_pos_on_screen = camera.WorldToViewportPoint(temp_hand_pos);
+            if(hand_pos_on_screen.x >= 0 && hand_pos_on_screen.x<=1
+                && hand_pos_on_screen.y >= 0 && hand_pos_on_screen.y <= 1
+                && hand_pos_on_screen.z > 0)
+            {
+                hand.position = temp_hand_pos;
+            }
+            else
+            {
+                hand.position = Vector3.zero;
+            }
             Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Hand", hand.position.ToString());
         }
 

@@ -45,7 +45,7 @@ namespace HoloKit.iOS
 
         static Dictionary<IntPtr, AppleVisionHandPoseDetector> s_Detectors = new();
 
-        private readonly object _lock = new object();
+        static private readonly object _lock = new object();
 
         public AppleVisionHandPoseDetector(MaxHandCount maxHandCount)
         {

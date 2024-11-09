@@ -24,6 +24,7 @@ public class EffectBase : MonoBehaviour
 
     protected int effectIndex = -1;
 
+    public bool IsOn { get => isOn; }
     protected bool isOn = false;
     protected float effectAlpha = 0;
 
@@ -82,6 +83,8 @@ public class EffectBase : MonoBehaviour
 
         marchingDistance = 0;
         effectRange = Vector2.zero;
+
+        Debug.Log($"[{this.GetType()}] Start Effect:{effectIndex}");
     }
 
     public virtual void StopEffect()
@@ -92,6 +95,8 @@ public class EffectBase : MonoBehaviour
 
         marchingDistance = 0;
         effectRange = Vector2.zero;
+
+        Debug.Log($"[{this.GetType()}] Stop Effect:{effectIndex}");
     }
 
     
@@ -104,7 +109,7 @@ public class EffectBase : MonoBehaviour
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
             return;
 
-        if (player == null || player.currentEffectIndex.Value != effectIndex && player.targetEffectIndex.Value != effectIndex)
+        if (player.currentEffectIndex.Value != effectIndex && player.targetEffectIndex.Value != effectIndex)
             return;
 
 

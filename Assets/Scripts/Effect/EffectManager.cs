@@ -41,4 +41,12 @@ public class EffectManager : MonoBehaviour
             return;
         effectList[effect_index].StopEffect();
     }
+
+    public bool IsEffectOn(int effect_index)
+    {
+        if (effectList == null || effect_index < 0 || effect_index > EffectCount - 1)
+            return false;
+
+        return effectList[effect_index].IsOn;
+    }
 }

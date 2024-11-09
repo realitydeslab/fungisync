@@ -40,6 +40,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] bool isInDevelopment = false;
     public bool IsInDevelopment { get => isInDevelopment; set => isInDevelopment = value; }
 
+    [SerializeField] bool takeHostAsPlayer = false;
+    public bool TakeHostAsPlayer { get => takeHostAsPlayer; }
+    public bool TakeHostAsSpectator { get => !takeHostAsPlayer; }
+    
+
     [Header("References")]
     [SerializeField] NetcodeConnectionManager connectionManager;
     public NetcodeConnectionManager ConnectionManager { get => connectionManager; }
@@ -59,6 +64,11 @@ public class GameManager : MonoBehaviour
 
     [Header("Events")]
     public UnityEvent<GameMode, PlayerRole> OnRoleSpecified;
+
+    void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
 
     #region Network Connection
     public void StartSinglePlayer(System.Action<bool, string> action)
@@ -412,6 +422,15 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Query Functions
+    public bool IsRolePlayer(Player player)
+    {
+        return player.role.Value == PlayerRole.Player || (player.role.Value == PlayerRole.Host && takeHostAsPlayer);
+    }
+
+    public bool IsRoleSpectator(Player player)
+    {
+        return player.role.Value == PlayerRole.Spectator || (player.role.Value == PlayerRole.Host && takeHostAsPlayer == false);
+    }
 
     #endregion
 
