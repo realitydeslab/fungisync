@@ -343,8 +343,12 @@ public class Player : NetworkBehaviour
 
         lastChangeEffectTime = Time.time;
 
-        currentEffectIndex.Value = effect_index;
 
+        int last_effect_index = currentEffectIndex.Value;
+        effectManager.StopEffect(last_effect_index);
+
+
+        currentEffectIndex.Value = effect_index;        
         effectManager.StartEffect(effect_index);
     }
 
@@ -366,15 +370,26 @@ public class Player : NetworkBehaviour
         SetTargetEffect(-1);
     }
 
-    void ChangeEffect(int index)
-    {
-        Debug.Log($"[{this.GetType()}] Change Effect");
-    }
-
     void SwitchEffect()
     {
         SetEffect(stackedTargetIndex);
 
         ClearTargetEffect();
+    }
+
+    public void ChangeToNextEffect()
+    {
+        int new_effect_index = (currentEffectIndex.Value + 1) % effectManager.EffectCount;
+
+        SetEffect(new_effect_index);
+    }
+
+    public void ChangeToPreviousEffect()
+    {
+        int new_effect_index = (currentEffectIndex.Value - 1);
+        if (new_effect_index < 0)
+            new_effect_index = effectManager.EffectCount - 1;
+
+        SetEffect(new_effect_index);
     }
 }

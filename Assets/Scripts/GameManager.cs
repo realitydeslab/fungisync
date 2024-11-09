@@ -51,7 +51,6 @@ public class GameManager : MonoBehaviour
 
 
 
-
     GameMode gameMode;
     public GameMode GameMode { get => gameMode; }
 
@@ -64,11 +63,25 @@ public class GameManager : MonoBehaviour
     #region Network Connection
     public void StartSinglePlayer(System.Action<bool, string> action)
     {
-        // Start Game as singler player
-        StartGame(GameMode.SinglePlayer, PlayerRole.Player);
+        //// Start Game as singler player
+        //StartGame(GameMode.SinglePlayer, PlayerRole.Player);
 
-        // Update UI
-        action?.Invoke(true, "");
+        //// Update UI
+        //action?.Invoke(true, "");
+
+
+        // To make logic simpler, when play as single player, we make it a host
+        StartHost((result, msg) =>
+        {
+            if (result == true)
+            {
+                // Start Game as host
+                StartGame(GameMode.SinglePlayer, PlayerRole.Player);
+            }
+
+            // Update UI
+            action?.Invoke(result, msg);
+        });
     }
 
     public void JoinAsPlayer(System.Action<bool, string> action)
@@ -109,6 +122,9 @@ public class GameManager : MonoBehaviour
             {
                 // Start Game as host
                 StartGame(GameMode.MultiplePlayer, PlayerRole.Host);
+
+                // Start broadcasting ip
+                serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
             }
 
             // Update UI
@@ -143,10 +159,6 @@ public class GameManager : MonoBehaviour
     void StartHost(System.Action<bool, string> action)
     {
         connectionManager.StartHost(((result, msg) => {
-
-            if (result)
-                serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
-
             action?.Invoke(result, msg);
         }));
     }
@@ -163,11 +175,11 @@ public class GameManager : MonoBehaviour
     }
 
     void Shutdown()
-    {
-        if(gameMode == GameMode.MultiplePlayer)
-        {
-            connectionManager.ShutDown();
+    {        
+        connectionManager.ShutDown();
 
+        if (gameMode == GameMode.MultiplePlayer)
+        {
             serverIPSynchronizer.ResetConnection();
         }        
     }
@@ -371,7 +383,33 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    
+    #region Effect Manager
+    public void ChangeToPreviousEffect()
+    {
+        if (NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
+            return;
+
+        Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
+
+        if (player == null)
+            return;
+
+        player.ChangeToPreviousEffect();
+    }
+
+    public void ChangeToNextEffect()
+    {
+        if (NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
+            return;
+
+        Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
+
+        if (player == null)
+            return;
+
+        player.ChangeToNextEffect();
+    }
+    #endregion
 
     #region Query Functions
 

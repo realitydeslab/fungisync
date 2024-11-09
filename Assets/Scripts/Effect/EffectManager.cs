@@ -30,7 +30,15 @@ public class EffectManager : MonoBehaviour
 
     public void StartEffect(int effect_index)
     {
+        if (effectList == null || effect_index < 0 || effect_index > EffectCount - 1)
+            return;
         effectList[effect_index].StartEffect();
     }
-    
+
+    public void StopEffect(int effect_index)
+    {
+        if (effectList == null || effect_index < 0 || effect_index > EffectCount - 1)
+            return;
+        effectList[effect_index].StopEffect();
+    }
 }

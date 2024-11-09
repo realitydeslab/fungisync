@@ -12,7 +12,7 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     string serverPassword = "123";
 
-    GameManager gameManager;    
+    GameManager gameManager;
     HoloKitCameraManager holoKitManager;
 
     // Pages
@@ -21,6 +21,7 @@ public class UIManager : MonoBehaviour
     Transform pagePassword;
     Transform pageWaiting;
     Transform pageRelocalization;
+    Transform pageGame;
     Transform pageExtraMenu;
 
     // Floating Panels
@@ -40,7 +41,7 @@ public class UIManager : MonoBehaviour
     void Awake()
     {
         holoKitManager = FindFirstObjectByType<HoloKitCameraManager>();
-        if(holoKitManager == null)
+        if (holoKitManager == null)
         {
             Debug.LogError($"[{this.GetType()}] Can't find HoloKitCameraManager.");
         }
@@ -51,6 +52,7 @@ public class UIManager : MonoBehaviour
         pagePassword = FindTransformAndRegister("Page_Password");
         pageWaiting = FindTransformAndRegister("Page_Waiting");
         pageRelocalization = FindTransformAndRegister("Page_Relocalization");
+        pageGame = FindTransformAndRegister("Page_Game");
         pageExtraMenu = FindTransformAndRegister("Page_ExtraMenu");
 
 
@@ -71,14 +73,17 @@ public class UIManager : MonoBehaviour
         FindButtonAndBind("Page_JoinType/Button_Player", OnClickPlayer_PageJoinType);
         FindButtonAndBind("Page_JoinType/Button_Spectator", OnClickSpectator_PageJoinType);
         FindButtonAndBind("Page_JoinType/Button_Server", OnClickServer_PageJoinType);
-        FindButtonAndBind("Page_JoinType/Button_Return", ()=> { GotoPage("Page_Home"); });
+        FindButtonAndBind("Page_JoinType/Button_Return", () => { GotoPage("Page_Home"); });
 
         FindButtonAndBind("Page_Password/Button_Enter", () => { OnConfirmPassword(transform.Find("Page_Password/InputField_Password")); });
         FindButtonAndBind("Page_Password/Button_Close", () => { GotoPage("Page_JoinType"); });
 
         FindButtonAndBind("Page_Relocalization/Button_Close", () => { CloseRelocalizationPage(); });
 
-        FindButtonAndBind("Page_ExtraMenu/Button_Calibrate", () => { GotoRelocalizationPage(); });       
+        FindButtonAndBind("Page_Game/Button_Left", () => { OnClickLeftArrow(); });
+        FindButtonAndBind("Page_Game/Button_Right", () => { OnClickRightArrow(); });
+
+        FindButtonAndBind("Page_ExtraMenu/Button_Calibrate", () => { GotoRelocalizationPage(); });
         FindButtonAndBind("Page_ExtraMenu/Button_Exit", () => { RestartGame(); });
         FindButtonAndBind("Page_ExtraMenu/Button_Return", () => { HideExtraMenu(); });
 
@@ -95,7 +100,7 @@ public class UIManager : MonoBehaviour
             if (longPressedTime >= LongPressedTimeThreshold)
             {
                 // If it's in game mode and screen mode is mono
-                if (currentPage == null && (holoKitManager != null && holoKitManager.ScreenRenderMode == HoloKit.ScreenRenderMode.Mono))
+                if (currentPage == pageGame && (holoKitManager != null && holoKitManager.ScreenRenderMode == HoloKit.ScreenRenderMode.Mono))
                 {
                     ShowExtraMenu();
                     longPressedTime = 0;
@@ -108,7 +113,7 @@ public class UIManager : MonoBehaviour
         }
 
         // Update relocalization progress
-        if(currentPage == pageRelocalization)
+        if (currentPage == pageRelocalization)
             progressText.text = Mathf.FloorToInt(GameManager.Instance.GetRelocalizationProgress() * 100f).ToString() + "%";
     }
 
@@ -122,7 +127,7 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            if(need_register)
+            if (need_register)
                 registeredPages.Add(name, ui_element);
         }
         return ui_element;
@@ -139,14 +144,14 @@ public class UIManager : MonoBehaviour
         }
 
         Button button = ui_element.GetComponent<Button>();
-        if(button == null)
+        if (button == null)
         {
             Debug.LogError($"[{this.GetType()}] Can't find Button components on element: {name}");
             return null;
         }
 
         button.onClick.AddListener(action);
-        
+
         return button;
     }
 
@@ -155,7 +160,7 @@ public class UIManager : MonoBehaviour
     {
         GameManager.Instance.StartSinglePlayer((result, msg) =>
         {
-            if(result == true)
+            if (result == true)
             {
                 EnterGame();
             }
@@ -168,9 +173,9 @@ public class UIManager : MonoBehaviour
     void OnClickPlayer_PageJoinType()
     {
         GotoWaitingPage("Connecting to server..");
-            
-        GameManager.Instance.JoinAsPlayer((result, msg)=> {
-            if(result == true)
+
+        GameManager.Instance.JoinAsPlayer((result, msg) => {
+            if (result == true)
             {
                 RegisterCallback();
 
@@ -178,7 +183,7 @@ public class UIManager : MonoBehaviour
             }
             else
             {
-                GotoWaitingPage(msg, 2, ()=>
+                GotoWaitingPage(msg, 2, () =>
                 {
                     GotoPage("Page_JoinType");
                 }); // display for 2s
@@ -198,7 +203,7 @@ public class UIManager : MonoBehaviour
             }
             else
             {
-                GotoWaitingPage(msg, 2, ()=>
+                GotoWaitingPage(msg, 2, () =>
                 {
                     GotoPage("Page_JoinType");
                 }); // display for 2s
@@ -212,7 +217,7 @@ public class UIManager : MonoBehaviour
 
     void OnConfirmPassword(Transform input_transform)
     {
-        if(input_transform == null)
+        if (input_transform == null)
         {
             Debug.LogError($"[{this.GetType()}] Can't find input element for Password.");
             return;
@@ -226,7 +231,7 @@ public class UIManager : MonoBehaviour
         }
 
         string pwd = input_field.text;
-        if(pwd == serverPassword)
+        if (pwd == serverPassword)
         {
             GameManager.Instance.JoinAsHost((result, msg) =>
             {
@@ -236,7 +241,7 @@ public class UIManager : MonoBehaviour
                 }
                 else
                 {
-                    GotoWaitingPage(msg, auto_close_time:2, ()=> {
+                    GotoWaitingPage(msg, auto_close_time: 2, () => {
                         // if failed, go back to previous page
                         GotoPage("Page_JoinType");
                     });
@@ -245,10 +250,26 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            GotoWaitingPage("Wrong Password.", auto_close_time: 2, ()=> {
+            GotoWaitingPage("Wrong Password.", auto_close_time: 2, () => {
                 // if wrong, type again
                 GotoPage("Page_Password");
             });
+        }
+    }
+
+    void OnClickLeftArrow()
+    {
+        if(GameManager.Instance.GameMode == GameMode.SinglePlayer)
+        {
+            GameManager.Instance.ChangeToPreviousEffect();
+        }        
+    }
+
+    void OnClickRightArrow()
+    {
+        if (GameManager.Instance.GameMode == GameMode.SinglePlayer)
+        {
+            GameManager.Instance.ChangeToNextEffect();
         }
     }
     #endregion
@@ -277,6 +298,15 @@ public class UIManager : MonoBehaviour
         if(target_page == pagePassword && GameManager.Instance.IsInDevelopment)
         {
             inputPassword.text = serverPassword;
+        }
+
+        // Extra operation: Show left, right arrow if in single player mode
+        if(target_page == pageGame)
+        {
+            for (int i = 0; i < pageGame.childCount; i++)
+            {
+                pageGame.GetChild(i).gameObject.SetActive(GameManager.Instance.GameMode == GameMode.SinglePlayer);
+            }
         }
 
         // update indicator
@@ -357,7 +387,7 @@ public class UIManager : MonoBehaviour
 
     void EnterGame()
     {
-        GotoPage(page_name:"EnterGame");
+        GotoPage(page_name:"Page_Game");
     }
 
     void ShowExtraMenu()

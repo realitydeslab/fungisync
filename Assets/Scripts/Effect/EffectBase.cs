@@ -12,12 +12,13 @@ public class EffectBase : MonoBehaviour
 
     protected Player player;
 
-    protected bool needPushHumanStencil = false;
-    //DepthImageProcessor depthImageProcessor;
-    protected bool needPushBuffer = false;
+    [SerializeField] protected bool needPushBuffer = false;
     //MeshToBufferConvertor meshToBufferConverter;
-    protected bool needPushHitPoint = false;
+    [SerializeField] protected bool needPushHitPoint = false;
     //MeshingRaycaster meshingRaycaster;
+    [SerializeField] protected bool needPushHumanStencil = false;
+    //DepthImageProcessor depthImageProcessor;    
+    
 
     EnvironmentProbe environmentProbe;
 
@@ -114,8 +115,13 @@ public class EffectBase : MonoBehaviour
         // Update marching range
         marchingDistance += Time.deltaTime * marchingSpeed;
         effectRange.x = Remap.Map(marchingDistance, 0, effectMaxRange, 0, effectMaxRange, marchingMode);
-        effectRange.y = Remap.Map(Mathf.Max(0, marchingDistance - effectWidth), 0, effectMaxRange, 0, effectMaxRange, marchingMode);
+        if(marchingMode == Remap.MapMode.Wrap || marchingMode == Remap.MapMode.Mirror)
+            effectRange.y = Remap.Map(Mathf.Max(0, marchingDistance - effectWidth), 0, effectMaxRange, 0, effectMaxRange, marchingMode);
+        else
+            effectRange.y = Remap.Map(Mathf.Max(0, effectRange.x - effectWidth), 0, effectMaxRange, 0, effectMaxRange, marchingMode);
 
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("EffectRangeX", effectRange.x.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("EffectRangeY", effectRange.y.ToString());
 
         // Update VFX
         PushParametersToVFX();
@@ -151,7 +157,10 @@ public class EffectBase : MonoBehaviour
             MeshToBufferConvertor meshToBufferConverter = environmentProbe.MeshToBufferConvertor;
             if (needPushBuffer == true && meshToBufferConverter != null)
             {
-                vfx.SetInt("VertexCount", meshToBufferConverter.VertexCount);
+                if (vfx.HasInt("VertexCount"))
+                {
+                    vfx.SetInt("VertexCount", meshToBufferConverter.VertexCount);
+                }                
                 if (meshToBufferConverter.VertexBuffer != null && vfx.HasGraphicsBuffer("VertexBuffer"))
                 {
                     vfx.SetGraphicsBuffer("VertexBuffer", meshToBufferConverter.VertexBuffer);
@@ -166,12 +175,15 @@ public class EffectBase : MonoBehaviour
             MeshingRaycaster meshingRaycaster = environmentProbe.MeshingRaycaster;
             if (needPushHitPoint && meshingRaycaster != null)
             {
-                vfx.SetInt("DidHit", meshingRaycaster.DidHit ? 1 : 0);
-                if (meshingRaycaster.HitPosition != null && vfx.HasGraphicsBuffer("HitPosition"))
+                if(vfx.HasBool("DidHit"))
+                {
+                    vfx.SetBool("DidHit", meshingRaycaster.DidHit);
+                }                
+                if (meshingRaycaster.HitPosition != null && vfx.HasVector3("HitPosition"))
                 {
                     vfx.SetVector3("HitPosition", meshingRaycaster.HitPosition);
                 }
-                if (meshingRaycaster.HitNormal != null && vfx.HasGraphicsBuffer("HitNormal"))
+                if (meshingRaycaster.HitNormal != null && vfx.HasVector3("HitNormal"))
                 {
                     vfx.SetVector3("HitNormal", meshingRaycaster.HitNormal);
                 }
