@@ -17,6 +17,6 @@ public class Effect2_Crystal : EffectBase
         base.UpdateVFXParameter();
 
         // set custom parameter
-        // 
+        //
     }
 }

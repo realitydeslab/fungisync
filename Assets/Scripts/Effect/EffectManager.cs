@@ -42,6 +42,17 @@ public class EffectManager : MonoBehaviour
         effectList[effect_index].StopEffect();
     }
 
+    public void StopAllEffect()
+    {
+        foreach(var effect in effectList)
+        {
+            if (effect == null || effect.IsOn == false)
+                continue;
+
+            effect.StopEffect();
+        }
+    }
+
     public bool IsEffectOn(int effect_index)
     {
         if (effectList == null || effect_index < 0 || effect_index > EffectCount - 1)

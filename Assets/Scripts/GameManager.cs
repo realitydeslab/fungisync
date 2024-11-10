@@ -16,6 +16,7 @@ public enum GameMode
 
 public enum PlayerRole
 {
+    Undefined,
     /// <summary>
     /// Individual player in network.
     /// Own its own effect.
@@ -32,7 +33,7 @@ public enum PlayerRole
     /// Working as server in network.
     /// Can see other's effect like Spectator
     /// </summary>
-    Host
+    //Host
 }
 
 public class GameManager : MonoBehaviour
@@ -53,6 +54,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] ImageTrackingStablizer relocalizationStablizer;
     [SerializeField] EnvironmentProbe environmentProbe;
     [SerializeField] PlayerManager playerManager;
+    [SerializeField] EffectManager effectManager;
 
 
 
@@ -131,7 +133,7 @@ public class GameManager : MonoBehaviour
             if (result == true)
             {
                 // Start Game as host
-                StartGame(GameMode.MultiplePlayer, PlayerRole.Host);
+                StartGame(GameMode.MultiplePlayer, TakeHostAsPlayer ? PlayerRole.Player : PlayerRole.Spectator); //PlayerRole.Host);
 
                 // Start broadcasting ip
                 serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
@@ -234,13 +236,16 @@ public class GameManager : MonoBehaviour
         Shutdown();
 
         // Disable EnvironmentProbe
-        environmentProbe.DisableEnvironmentProbe(); 
+        environmentProbe.DisableEnvironmentProbe();         
+
+        // Reset Player List
+        playerManager.ResetPlayerManager();
+
+        // Reset Effect
+        effectManager.StopAllEffect();
 
         // Reset Role
         ResetRole();
-
-        // Reset Player List
-        playerManager.ResetPlayerList();
 
         // Update UI
         action?.Invoke();
@@ -396,40 +401,30 @@ public class GameManager : MonoBehaviour
     #region Effect Manager
     public void ChangeToPreviousEffect()
     {
-        if (NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
+        if (gameMode != GameMode.SinglePlayer)
             return;
 
-        Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
-
-        if (player == null)
-            return;
-
-        player.ChangeToPreviousEffect();
+        playerManager.ChangeToPreviousEffect();
     }
 
     public void ChangeToNextEffect()
     {
-        if (NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
+        if (gameMode != GameMode.SinglePlayer)
             return;
 
-        Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
-
-        if (player == null)
-            return;
-
-        player.ChangeToNextEffect();
+        playerManager.ChangeToNextEffect();
     }
     #endregion
 
     #region Query Functions
     public bool IsRolePlayer(Player player)
     {
-        return player.role.Value == PlayerRole.Player || (player.role.Value == PlayerRole.Host && takeHostAsPlayer);
+        return player.role.Value == PlayerRole.Player;// || (player.role.Value == PlayerRole.Host && takeHostAsPlayer);
     }
 
     public bool IsRoleSpectator(Player player)
     {
-        return player.role.Value == PlayerRole.Spectator || (player.role.Value == PlayerRole.Host && takeHostAsPlayer == false);
+        return player.role.Value == PlayerRole.Spectator;// || (player.role.Value == PlayerRole.Host && takeHostAsPlayer == false);
     }
 
     #endregion

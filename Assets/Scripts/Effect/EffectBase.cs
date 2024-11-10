@@ -75,6 +75,8 @@ public class EffectBase : MonoBehaviour
 
     public virtual void StartEffect()
     {
+        if (isOn)
+            return;
         player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
 
         isOn = true;
@@ -89,6 +91,9 @@ public class EffectBase : MonoBehaviour
 
     public virtual void StopEffect()
     {
+        if (isOn == false)
+            return;
+
         isOn = false;
 
         vfx.enabled = false;

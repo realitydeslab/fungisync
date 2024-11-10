@@ -40,21 +40,25 @@ public struct PlayerHand : INetworkSerializable, System.IEquatable<PlayerHand>
 public class Player : NetworkBehaviour
 {
 
-    public NetworkVariable<PlayerRole> role = new NetworkVariable<PlayerRole>(PlayerRole.Player, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<PlayerRole> role = new NetworkVariable<PlayerRole>(PlayerRole.Undefined, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     /// <summary>
     /// Own effect index
     /// </summary>
-    public NetworkVariable<int> currentEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> currentEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     /// <summary>
     /// target effect index which blending towards
     /// </summary>
-    public NetworkVariable<int> targetEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> targetEffectIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     /// <summary>
     /// Lerp value between own effect and target effect
     /// 0 - fully own effect
     /// 1 - fully target effect
     /// </summary>
-    public NetworkVariable<float> effectLerp = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<float> effectLerp = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    /// <summary>
+    ///
+    /// </summary>
+    public NetworkVariable<int> handshakeFrameCount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     int stackedTargetIndex = -1;
 
@@ -68,7 +72,7 @@ public class Player : NetworkBehaviour
 
     float blendingSpeed = 1;
     float blendingDirection = 0;
-    float lastChangeEffectTime = 0;
+    public float lastChangeEffectTime = 0;
     float effectChangeProtectionTime = 5;
 
     float viewAngleThreshold = 60; // Below this angle, it is within the field of view
@@ -76,7 +80,7 @@ public class Player : NetworkBehaviour
     float maxDistanceThreshold = 1; // Maximum distance thresold within which will blend effect
     float minDistanceThreshold = 0.2f; // Minimum distance threshold within which will be considered as same place
 
-    int handshakeFrameCount = 0;
+    //public int handshakeFrameCount = 0;
     int handshakeFrameThreshold = 60;
 
     bool handshakeLock = false;
@@ -93,14 +97,31 @@ public class Player : NetworkBehaviour
         if (effectManager == null)
         {
             Debug.LogError($"[{this.GetType()}] Can't find EffectManager.");
-        }        
+        }
 
         body = transform.GetChild(0);
         hand = transform.GetChild(1);
-
-        Debug.Log("Awake");
     }
 
+    void Update()
+    {
+        if (IsOwner == false || IsSpawned == false)
+            return;
+
+        if (GameManager.Instance.GameMode == GameMode.Undefined)
+            return;
+
+
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Current Effect", currentEffectIndex.Value.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Current Effect IsOn", effectManager.IsEffectOn(currentEffectIndex.Value).ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Target Effect", targetEffectIndex.Value.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Target Effect IsOn", effectManager.IsEffectOn(targetEffectIndex.Value).ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Lerp", effectLerp.Value.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("HandshakeFrameCount", handshakeFrameCount.Value.ToString());
+
+        
+    }
+    /*
     void Update()
     {
         if (IsOwner == false || IsSpawned == false)
@@ -284,7 +305,7 @@ public class Player : NetworkBehaviour
 
         return angle < viewAngleThreshold;
     }
-
+    */
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -292,15 +313,18 @@ public class Player : NetworkBehaviour
         if (IsOwner == false)
             return;
 
+        currentEffectIndex.OnValueChanged += OnCurrentEffectIndexChanged;
+        targetEffectIndex.OnValueChanged += OnTargetEffectIndexChanged;
+
         if (GameManager.Instance != null)
         {
             // Not sure the execution order between OnNetworkSpawn and OnRoleSpecified.
             // Need to make sure that player can be set role correctly.
             // If OnNetworkSpawn is executed before OnRoleSpecified
-            GameManager.Instance.OnRoleSpecified.AddListener(OnRoleSpecified);
+            GameManager.Instance.OnRoleSpecified.AddListener(OnRoleSpecified); 
 
             // If OnNetworkSpawn is executed after OnRoleSpecified
-            if(GameManager.Instance.GameMode != GameMode.Undefined)
+            if (GameManager.Instance.GameMode != GameMode.Undefined)
             {
                 OnRoleSpecified(GameManager.Instance.GameMode, GameManager.Instance.PlayerRole);
             }
@@ -316,6 +340,9 @@ public class Player : NetworkBehaviour
         if (IsOwner == false)
             return;
 
+        currentEffectIndex.OnValueChanged -= OnCurrentEffectIndexChanged;
+        targetEffectIndex.OnValueChanged -= OnTargetEffectIndexChanged;
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnRoleSpecified.RemoveListener(OnRoleSpecified);
@@ -326,11 +353,30 @@ public class Player : NetworkBehaviour
 
     void OnRoleSpecified(GameMode game_mode, PlayerRole player_role)
     {
-        role.Value = player_role;
+        playerManager.SetLocalPlayer(this);
 
-        InitializeEffect();
+        role.Value = player_role;
     }
 
+    void OnCurrentEffectIndexChanged(int prev_index, int new_index)
+    {
+        if (prev_index != -1)
+            effectManager.StopEffect(prev_index);
+
+        if (new_index != -1)
+            effectManager.StartEffect(new_index);
+    }
+
+    void OnTargetEffectIndexChanged(int prev_index, int new_index)
+    {
+        if (prev_index != -1 && prev_index != currentEffectIndex.Value)
+            effectManager.StopEffect(prev_index);
+
+        if (new_index != -1)
+            effectManager.StartEffect(new_index);
+    }
+
+    /*
     void InitializeEffect()
     {
         Debug.Log($"[{this.GetType()}] Initialize Effect");
@@ -365,7 +411,7 @@ public class Player : NetworkBehaviour
         effectManager.StartEffect(effect_index);
     }
 
-    void SetTargetEffect(int effect_index)
+    public void SetTargetEffect(int effect_index)
     {
         if (targetEffectIndex.Value == effect_index)
             return;
@@ -406,4 +452,5 @@ public class Player : NetworkBehaviour
 
         SetEffect(new_effect_index);
     }
+    */
 }
