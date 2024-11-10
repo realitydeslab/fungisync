@@ -60,6 +60,10 @@ public class Player : NetworkBehaviour
     /// </summary>
     public NetworkVariable<int> handshakeFrameCount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    public NetworkVariable<Vector3> handshakeTargetPosition = new NetworkVariable<Vector3>(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    public NetworkVariable<int> handshakeTargetClientID = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     int stackedTargetIndex = -1;
 
     PlayerManager playerManager;

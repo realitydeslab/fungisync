@@ -13,6 +13,7 @@ public class PlayerManager : NetworkBehaviour
 
     EffectManager effectManager;
 
+    public Player LocalPlayer { get => localPlayer; }
     Player localPlayer;
 
     public UnityEvent<ulong> OnPlayerJoined;
@@ -26,6 +27,7 @@ public class PlayerManager : NetworkBehaviour
     float maxDistanceThreshold = 1; // Maximum distance thresold within which will blend effect
     float minDistanceThreshold = 0.2f; // Minimum distance threshold within which will be considered as same place
 
+    public int HandshakeFrameThreshold { get => handshakeFrameThreshold; }
     int handshakeFrameThreshold = 180;
 
     void Awake()
@@ -47,7 +49,6 @@ public class PlayerManager : NetworkBehaviour
 
         if (GameManager.Instance.GameMode == GameMode.Undefined)
             return;
-
 
         // Update Player List
         UpdatePlayerList();
@@ -75,7 +76,8 @@ public class PlayerManager : NetworkBehaviour
                 if (nearest_player != null && min_dis <= maxDistanceThreshold)
                 {
                     // Set target effect with other player's effect index
-                    SetPlayerTargetEffect(p1, nearest_player.currentEffectIndex.Value);
+                    SetPlayerTargetEffect(p1, nearest_player.currentEffectIndex.Value, (int)nearest_player.OwnerClientId);
+
 
                     // Falloff
                     float max_lerp = Utilities.Remap(min_dis, minDistanceThreshold, maxDistanceThreshold, 1, 0, need_clamp: true);
@@ -110,6 +112,12 @@ public class PlayerManager : NetworkBehaviour
                             p1.handshakeFrameCount.Value++;
                         }
                     }
+
+                    // Handshake effect
+                    if(p1.handshakeFrameCount.Value > 0 && p1.targetEffectIndex.Value != -1)
+                    {
+                        p1.handshakeTargetPosition.Value = nearest_player.Hand.position;
+                    }
                 }
 
                 // If no one is near
@@ -129,6 +137,8 @@ public class PlayerManager : NetworkBehaviour
                     if (p1.handshakeFrameCount.Value - 1 < 0)
                     {
                         p1.handshakeFrameCount.Value = 0;
+
+                        p1.handshakeTargetPosition.Value = Vector3.zero;
                     }
                     else
                     {
@@ -162,7 +172,7 @@ public class PlayerManager : NetworkBehaviour
         player.currentEffectIndex.Value = effect_index;
     }
 
-    void SetPlayerTargetEffect(Player player, int effect_index)
+    void SetPlayerTargetEffect(Player player, int effect_index, int owner_id = -1)
     {
         // If it's already the target, then do nothing
         if (player.targetEffectIndex.Value == effect_index)
@@ -175,6 +185,9 @@ public class PlayerManager : NetworkBehaviour
 
         // update target
         player.targetEffectIndex.Value = effect_index;
+
+        // update opponent client id
+        player.handshakeTargetClientID.Value = owner_id;
     }
 
     void ClearTargetEffect(Player player)
