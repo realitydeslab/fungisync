@@ -7665,7 +7665,7 @@ MonoBehaviour:
   relocalizationStablizer: {fileID: 1527079174}
   environmentProbe: {fileID: 2029210341}
   playerManager: {fileID: 1306084813}
-  effectManager: {fileID: 0}
+  effectManager: {fileID: 824350145}
   OnRoleSpecified:
     m_PersistentCalls:
       m_Calls: []
@@ -14380,9 +14380,9 @@ SceneRoots:
   - {fileID: 1782090923}
   - {fileID: 2032849505}
   - {fileID: 1818293297}
+  - {fileID: 2029210340}
   - {fileID: 2129315324}
   - {fileID: 1150249565}
-  - {fileID: 2029210340}
   - {fileID: 40212703}
   - {fileID: 1306084812}
   - {fileID: 166867765}

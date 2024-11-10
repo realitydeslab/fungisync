@@ -327,7 +327,7 @@ public class PlayerManager : NetworkBehaviour
 
     void UpdatePlayerList()
     {
-        if (GameManager.Instance.GameMode == GameMode.SinglePlayer || GameManager.Instance.GameMode == GameMode.Undefined)
+        if (GameManager.Instance.GameMode == GameMode.Undefined)
             return;
 
         if (NetworkManager.Singleton == null)
