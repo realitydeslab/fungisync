@@ -1942,8 +1942,8 @@ MonoBehaviour:
   needPushHumanStencil: 0
   effectColor: {r: 1, g: 1, b: 1, a: 1}
   effectMaxRange: 8
-  effectWidth: 8
-  marchingMode: 1
+  effectWidth: 0.5
+  marchingMode: 2
   marchingSpeed: 1
 --- !u!1 &219000871
 GameObject:
@@ -2160,6 +2160,14 @@ PrefabInstance:
     - target: {fileID: 8405203489913831050, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
       propertyPath: isVisible
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8405203489913831050, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
+      propertyPath: openByDefault
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8405203489913831050, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
+      propertyPath: enabledByDefault
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8432827896604446669, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
       propertyPath: m_AnchorMax.y
@@ -6064,9 +6072,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 208901888}
   - {fileID: 1071347975}
   - {fileID: 326776013}
-  - {fileID: 208901888}
   - {fileID: 89898073}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
