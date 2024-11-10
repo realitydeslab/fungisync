@@ -49,7 +49,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 680875054685490662}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -172,7 +172,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3959347305336750605}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -327,3 +327,10 @@ MonoBehaviour:
     m_InternalValue: -1
   effectLerp:
     m_InternalValue: 0
+  handshakeFrameCount:
+    m_InternalValue: 0
+  handshakeTargetPosition:
+    m_InternalValue: {x: 0, y: 0, z: 0}
+  handshakeTargetClientID:
+    m_InternalValue: -1
+  lastChangeEffectTime: 0
