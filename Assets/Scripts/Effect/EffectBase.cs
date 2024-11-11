@@ -17,8 +17,9 @@ public class EffectBase : MonoBehaviour
     [SerializeField] protected bool needPushHitPoint = false;
     //MeshingRaycaster meshingRaycaster;
     [SerializeField] protected bool needPushHumanStencil = false;
-    //DepthImageProcessor depthImageProcessor;    
-    
+    //DepthImageProcessor depthImageProcessor;
+    [SerializeField] protected bool needPushAudioData = false;
+
 
     EnvironmentProbe environmentProbe;
 
@@ -146,13 +147,13 @@ public class EffectBase : MonoBehaviour
     {
         if (vfx != null)
         {
-            vfx.SetBool("IsOn", isOn);
-            vfx.SetFloat("Alpha", effectAlpha);
-            vfx.SetVector4("EffectColor", effectColor);
-            vfx.SetVector2("EffectRange", effectRange);
-            vfx.SetFloat("EffectWidth", effectWidth);
-            vfx.SetVector3("Player_position", player.Body.position);
-            vfx.SetVector3("Player_angles", player.Body.eulerAngles);
+            if(vfx.HasBool("IsOn"))                 vfx.SetBool("IsOn", isOn);
+            if (vfx.HasFloat("Alpha"))              vfx.SetFloat("Alpha", effectAlpha);
+            if (vfx.HasVector4("EffectColor"))      vfx.SetVector4("EffectColor", effectColor);
+            if (vfx.HasVector2("EffectRange"))      vfx.SetVector2("EffectRange", effectRange);
+            if (vfx.HasFloat("EffectWidth"))        vfx.SetFloat("EffectWidth", effectWidth);
+            if (vfx.HasVector3("Player_position"))  vfx.SetVector3("Player_position", player.Body.position);
+            if (vfx.HasVector3("Player_angles"))    vfx.SetVector3("Player_angles", player.Body.eulerAngles);
 
 
             DepthImageProcessor depthImageProcessor = environmentProbe.DepthImageProcessor;
@@ -197,6 +198,14 @@ public class EffectBase : MonoBehaviour
                 {
                     vfx.SetVector3("HitNormal", meshingRaycaster.HitNormal);
                 }
+            }
+
+            HolokitAudioProcessor audioProcessor = environmentProbe.AudioProcessor;
+            if (needPushAudioData && audioProcessor != null)
+            {
+                if (vfx.HasFloat("AudioVolume")) vfx.SetFloat("AudioVolume", audioProcessor.AudioVolume);
+
+                if (vfx.HasFloat("AudioPitch")) vfx.SetFloat("AudioPitch", audioProcessor.AudioPitch);
             }
         }
     }

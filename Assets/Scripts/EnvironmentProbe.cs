@@ -14,6 +14,8 @@ public class EnvironmentProbe : MonoBehaviour
     public MeshToBufferConvertor MeshToBufferConvertor { get => meshToBufferConvertor; }
     [SerializeField] MeshingRaycaster meshingRaycaster ;
     public MeshingRaycaster MeshingRaycaster { get => meshingRaycaster; }
+    [SerializeField] HolokitAudioProcessor audioProcessor;
+    public HolokitAudioProcessor AudioProcessor { get => audioProcessor; }
 
 
     // XR Environment running in Editor mode has to be enabled at start to correctly recognize meshes.

@@ -1175,6 +1175,7 @@ MonoBehaviour:
   needPushBuffer: 1
   needPushHitPoint: 1
   needPushHumanStencil: 0
+  needPushAudioData: 0
   effectColor: {r: 1, g: 1, b: 1, a: 1}
   effectMaxRange: 4
   effectWidth: 0.2
@@ -1940,6 +1941,7 @@ MonoBehaviour:
   needPushBuffer: 1
   needPushHitPoint: 0
   needPushHumanStencil: 0
+  needPushAudioData: 0
   effectColor: {r: 1, g: 1, b: 1, a: 1}
   effectMaxRange: 8
   effectWidth: 0.5
@@ -2095,6 +2097,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3527325231213256454, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3527325231213256454, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3809820489941444338, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5033265825654751545, guid: 61063bd6e2b864211a1a46f1928a1661, type: 3}
@@ -2699,6 +2709,7 @@ MonoBehaviour:
   needPushBuffer: 0
   needPushHitPoint: 0
   needPushHumanStencil: 1
+  needPushAudioData: 0
   effectColor: {r: 1, g: 1, b: 1, a: 1}
   effectMaxRange: 8
   effectWidth: 8
@@ -7625,6 +7636,7 @@ MonoBehaviour:
   needPushBuffer: 1
   needPushHitPoint: 0
   needPushHumanStencil: 0
+  needPushAudioData: 0
   effectColor: {r: 1, g: 1, b: 1, a: 1}
   effectMaxRange: 8
   effectWidth: 0.5
@@ -14069,6 +14081,7 @@ MonoBehaviour:
   depthImageProcessor: {fileID: 2029210339}
   meshToBufferConvertor: {fileID: 2029210338}
   meshingRaycaster: {fileID: 2029210342}
+  audioProcessor: {fileID: 1818293295}
 --- !u!114 &2029210342
 MonoBehaviour:
   m_ObjectHideFlags: 0
