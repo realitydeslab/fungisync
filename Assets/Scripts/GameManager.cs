@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] NetcodeConnectionManager connectionManager;
     public NetcodeConnectionManager ConnectionManager { get => connectionManager; }
 
-    [SerializeField] ServerIPSynchronizer serverIPSynchronizer;    
+    //[SerializeField] ServerIPSynchronizer serverIPSynchronizer;    
     [SerializeField] ImageTrackingStablizer relocalizationStablizer;
     [SerializeField] EnvironmentProbe environmentProbe;
     [SerializeField] PlayerManager playerManager;
@@ -135,8 +135,8 @@ public class GameManager : MonoBehaviour
                 // Start Game as host
                 StartGame(GameMode.MultiplePlayer, TakeHostAsPlayer ? PlayerRole.Player : PlayerRole.Spectator); //PlayerRole.Host);
 
-                // Start broadcasting ip
-                serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
+                //// Start broadcasting ip
+                //serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
             }
 
             // Update UI
@@ -147,11 +147,12 @@ public class GameManager : MonoBehaviour
     void StartClient(System.Action<bool, string> action)
     {
         // 1. Receive Server IP
-        serverIPSynchronizer.StartReceivingServerIp(((server_ip_result, server_ip_msg) => {
-            if(server_ip_result)
-            {
-                // 2. Set Server IP
-                connectionManager.ServerIP = server_ip_msg;
+        //serverIPSynchronizer.StartReceivingServerIp(((server_ip_result, server_ip_msg) =>
+        //{
+        //if (server_ip_result)
+        //{
+        //    // 2. Set Server IP
+        //    connectionManager.ServerIP = server_ip_msg;
 
                 // 3. Start Connection
                 connectionManager.StartClient(((connection_result, connection_msg) => {
@@ -159,13 +160,13 @@ public class GameManager : MonoBehaviour
                     action?.Invoke(connection_result, connection_msg);
 
                 }));
-            }
-            else
-            {
-                string msg = server_ip_msg; // if result == false, server_ip refers to error msg
-                action?.Invoke(false, msg);
-            }            
-        }));        
+        //    }
+        //    else
+        //    {
+        //        string msg = server_ip_msg; // if result == false, server_ip refers to error msg
+        //        action?.Invoke(false, msg);
+        //    }
+        //}));        
     }
 
     void StartHost(System.Action<bool, string> action)
@@ -179,8 +180,8 @@ public class GameManager : MonoBehaviour
     {
         connectionManager.StartServer(new System.Action<bool, string>((result, msg) => {
 
-            if (result)
-                serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
+            //if (result)
+            //    serverIPSynchronizer.StartBroadcastingServerIp(connectionManager.ServerIP);
 
             action?.Invoke(result, msg);
         }));
@@ -190,10 +191,10 @@ public class GameManager : MonoBehaviour
     {        
         connectionManager.ShutDown();
 
-        if (gameMode == GameMode.MultiplePlayer)
-        {
-            serverIPSynchronizer.ResetConnection();
-        }        
+        //if (gameMode == GameMode.MultiplePlayer)
+        //{
+        //    serverIPSynchronizer.ResetConnection();
+        //}        
     }
 
     void WaitForPlayerPrefabSpawned(System.Action<bool, string> action)

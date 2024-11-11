@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
     Transform pageHome;
     Transform pageJoinType;
     Transform pagePassword;
+    Transform pageSettings;
     Transform pageWaiting;
     Transform pageRelocalization;
     Transform pageGame;
@@ -50,6 +51,7 @@ public class UIManager : MonoBehaviour
         pageHome = FindTransformAndRegister("Page_Home");
         pageJoinType = FindTransformAndRegister("Page_JoinType");
         pagePassword = FindTransformAndRegister("Page_Password");
+        pageSettings = FindTransformAndRegister("Page_Settings");
         pageWaiting = FindTransformAndRegister("Page_Waiting");
         pageRelocalization = FindTransformAndRegister("Page_Relocalization");
         pageGame = FindTransformAndRegister("Page_Game");
@@ -73,10 +75,14 @@ public class UIManager : MonoBehaviour
         FindButtonAndBind("Page_JoinType/Button_Player", OnClickPlayer_PageJoinType);
         FindButtonAndBind("Page_JoinType/Button_Spectator", OnClickSpectator_PageJoinType);
         FindButtonAndBind("Page_JoinType/Button_Server", OnClickServer_PageJoinType);
+        FindButtonAndBind("Page_JoinType/Button_Settings", OnClickSettings_PageJoinType);
         FindButtonAndBind("Page_JoinType/Button_Return", () => { GotoPage("Page_Home"); });
 
         FindButtonAndBind("Page_Password/Button_Enter", () => { OnConfirmPassword(transform.Find("Page_Password/InputField_Password")); });
         FindButtonAndBind("Page_Password/Button_Close", () => { GotoPage("Page_JoinType"); });
+
+        FindButtonAndBind("Page_Settings/Button_Enter", () => { OnConfirmServerIP(transform.Find("Page_Settings/InputField_ServerIP")); });
+        FindButtonAndBind("Page_Settings/Button_Close", () => { GotoPage("Page_JoinType"); });
 
         FindButtonAndBind("Page_Relocalization/Button_Close", () => { CloseRelocalizationPage(); });
 
@@ -254,6 +260,42 @@ public class UIManager : MonoBehaviour
                 // if wrong, type again
                 GotoPage("Page_Password");
             });
+        }
+    }
+
+    void OnClickSettings_PageJoinType()
+    {
+        GotoPage("Page_Settings");
+    }
+
+    void OnConfirmServerIP(Transform input_transform)
+    {
+        if (input_transform == null)
+        {
+            Debug.LogError($"[{this.GetType()}] Can't find input element for ServerIP.");
+            return;
+        }
+
+        TMP_InputField input_field = input_transform.GetComponent<TMP_InputField>();
+        if (input_field == null)
+        {
+            Debug.LogError($"[{this.GetType()}] Can't find input component for ServerIP.");
+            return;
+        }
+
+        string server_ip = input_field.text;
+
+        if(GameManager.Instance.ConnectionManager.IsIPAddressValide(server_ip) == false)
+        {
+            GotoWaitingPage("Wrong format for ip address.", auto_close_time: 2, () => {
+                // if wrong, type again
+                GotoPage("Page_Settings");
+            });
+        }
+        else
+        {
+            GameManager.Instance.ConnectionManager.ServerIP = server_ip;
+            GotoPage("Page_JoinType");
         }
     }
 
