@@ -10,6 +10,7 @@ public class EffectBase : MonoBehaviour
     [SerializeField]
     protected Material mat = null;
 
+    protected PlayerManager playerManager;
     protected Player player;
 
     [SerializeField] protected bool needPushBuffer = false;
@@ -58,6 +59,12 @@ public class EffectBase : MonoBehaviour
         //    Debug.LogError($"[{this.GetType()}] Can't find MeshingRaycaster");
         //}
 
+        playerManager = FindFirstObjectByType<PlayerManager>();
+        if (playerManager == null)
+        {
+            Debug.LogError($"[{this.GetType()}] Can't find PlayerManager");
+        }
+
 
         environmentProbe = FindFirstObjectByType<EnvironmentProbe>();
         if(environmentProbe == null)
@@ -78,7 +85,6 @@ public class EffectBase : MonoBehaviour
     {
         if (isOn)
             return;
-        player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
 
         isOn = true;
 
@@ -87,7 +93,9 @@ public class EffectBase : MonoBehaviour
         marchingDistance = 0;
         effectRange = Vector2.zero;
 
-        Debug.Log($"[{this.GetType()}] Start Effect:{effectIndex}");
+        player = playerManager.ActivePlayer;
+
+        Debug.Log($"Player(id={player.OwnerClientId})Start Effect:{effectIndex} ({this.GetType()})");
     }
 
     public virtual void StopEffect()
@@ -102,7 +110,9 @@ public class EffectBase : MonoBehaviour
         marchingDistance = 0;
         effectRange = Vector2.zero;
 
-        Debug.Log($"[{this.GetType()}] Stop Effect:{effectIndex}");
+        player = null;
+
+        Debug.Log($"Player(id={player.OwnerClientId})Stop Effect:{effectIndex} ({this.GetType()})");
     }
 
     
@@ -113,6 +123,9 @@ public class EffectBase : MonoBehaviour
             return;
 
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
+            return;
+
+        if (player == null)
             return;
 
         if (player.currentEffectIndex.Value != effectIndex && player.targetEffectIndex.Value != effectIndex)

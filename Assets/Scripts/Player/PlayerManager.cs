@@ -13,8 +13,11 @@ public class PlayerManager : NetworkBehaviour
 
     EffectManager effectManager;
 
-    public Player LocalPlayer { get => localPlayer; }
-    Player localPlayer;
+    public Player ActivePlayer { get => activePlayer; }
+    Player activePlayer;
+    public int SpectatingPlayerId { get => spectatingPlayerId; }
+    int spectatingPlayerId = -1;
+    
 
     public UnityEvent<ulong> OnPlayerJoined;
     public UnityEvent<ulong> OnPlayerLeft;
@@ -41,7 +44,7 @@ public class PlayerManager : NetworkBehaviour
 
     void Update()
     {
-        if (IsServer == false)
+        if (NetworkManager.Singleton == null || NetworkManager.Singleton.IsConnectedClient == false)
             return;
 
         if (IsSpawned == false)
@@ -50,10 +53,46 @@ public class PlayerManager : NetworkBehaviour
         if (GameManager.Instance.GameMode == GameMode.Undefined)
             return;
 
+        if(GameManager.Instance.PlayerRole == PlayerRole.Player && IsServer && activePlayer == null)
+        {
+            activePlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
+        }
+
+        /////////////////////////////////////
+        /// Both server and client will execute
+        /////////////////////////////////////
         // Update Player List
         UpdatePlayerList();
 
+        // Update Local Player
+        // PlayerRole.Player: use local player as LocalPlayer
+        // PlayerRole.Spectator: specify one of the player as LocalPlayer
+        if (GameManager.Instance.PlayerRole == PlayerRole.Player)
+        {
+            activePlayer = playerList.ContainsKey(NetworkManager.Singleton.LocalClientId) ? playerList[NetworkManager.Singleton.LocalClientId] : null;
+        }           
+        else if (GameManager.Instance.PlayerRole == PlayerRole.Spectator)
+        {
+            activePlayer = spectatingPlayerId != -1 && playerList.ContainsKey((ulong)spectatingPlayerId) ? playerList[(ulong)spectatingPlayerId] : null;
+        }
+        else
+        {
+            activePlayer = null;
+        }
 
+
+
+        /////////////////////////////////////
+        /// Only server will execute
+        /////////////////////////////////////
+        if (IsServer == false)
+            return;
+
+        ManageHandshakeForAllPlayers();
+    }
+
+    void ManageHandshakeForAllPlayers()
+    {
         // Update lerp and handshaking
         foreach (var p1 in playerList.Values)
         {
@@ -93,7 +132,7 @@ public class PlayerManager : NetworkBehaviour
                     // Handshake timer
                     if (min_dis < minDistanceThreshold)
                     {
-                        
+
 
                         // Handshake finished
                         if (p1.handshakeFrameCount.Value + 1 > handshakeFrameThreshold)
@@ -102,10 +141,10 @@ public class PlayerManager : NetworkBehaviour
 
                             bool handshake_state = CheckHandshakeState(p1, nearest_player);
 
-                            if(handshake_state)
+                            if (handshake_state)
                             {
                                 SwitchPlayerEffect(p1, nearest_player);
-                            }                            
+                            }
                         }
                         else
                         {
@@ -114,7 +153,7 @@ public class PlayerManager : NetworkBehaviour
                     }
 
                     // Handshake effect
-                    if(p1.handshakeFrameCount.Value > 0 && p1.targetEffectIndex.Value != -1)
+                    if (p1.handshakeFrameCount.Value > 0 && p1.targetEffectIndex.Value != -1)
                     {
                         p1.handshakeTargetPosition.Value = nearest_player.Hand.position;
                     }
@@ -388,6 +427,8 @@ public class PlayerManager : NetworkBehaviour
             }
         }
 
+        // remove player if needed
+        bool need_to_update_spectating_player = false;
         for (int i = 0; i < player_to_be_removed.Count; i++)
         {
             ulong client_id = player_to_be_removed[i];
@@ -396,8 +437,18 @@ public class PlayerManager : NetworkBehaviour
 
             OnPlayerLeft?.Invoke(client_id);
 
+            if (GameManager.Instance.PlayerRole == PlayerRole.Spectator && spectatingPlayerId != -1 && (int)client_id == spectatingPlayerId)
+                need_to_update_spectating_player = true;
+
             Debug.Log($"[{ this.GetType()}] Player {client_id} Left. Player Count:{playerList.Count}");
         }
+
+        // if player being speclated has been removed, update spectating player
+        if(need_to_update_spectating_player)
+        {
+            OnLostSpectatingPlayer();
+        }        
+
 
         // check if new player joined
         for (int i = 0; i < tempPlayerList.Count; i++)
@@ -409,7 +460,12 @@ public class PlayerManager : NetworkBehaviour
 
                 OnPlayerJoined?.Invoke(client_id);
 
-                InitializePlayerEffect(tempPlayerList[i]);
+                // Only server can specify effect for newer player
+                if(IsServer)
+                {
+                    InitializePlayerEffect(tempPlayerList[i]);
+                }
+                    
 
                 Debug.Log($"[{ this.GetType()}] Player {client_id} Joined. Player Count:{playerList.Count}");
             }
@@ -418,14 +474,14 @@ public class PlayerManager : NetworkBehaviour
 
     public void SetLocalPlayer(Player player)
     {
-        localPlayer = player;
+        activePlayer = player;
     }
-
-
 
     public void ResetPlayerManager()
     {
-        localPlayer = null;
+        activePlayer = null;
+
+        spectatingPlayerId = -1;
 
         if(IsServer)
         {
@@ -434,6 +490,129 @@ public class PlayerManager : NetworkBehaviour
     }
 
     
+
+    public void SpectateNextPlayer()
+    {
+        if (GameManager.Instance.PlayerRole != PlayerRole.Spectator)
+            return;
+
+        if (playerList.Count == 0)
+            return;
+
+        int current_player_index = GetIndexByClientID(spectatingPlayerId);
+
+        int new_player_index = -1;
+        if(current_player_index == -1)
+        {
+            new_player_index = 0;
+        }
+        else
+        {
+            new_player_index = (current_player_index + 1) % playerList.Count;
+        }
+
+        int client_id = GetClientIDByIndex(new_player_index);
+
+        Debug.Log($"[{this.GetType()}] Spectate Next Player:{client_id}");
+
+        StartSpectatingPlayer(client_id);
+    }
+
+    public void SpectatePreviousPlayer()
+    {
+        if (GameManager.Instance.PlayerRole != PlayerRole.Spectator)
+            return;
+
+        if (playerList.Count == 0)
+            return;
+
+        int current_player_index = GetIndexByClientID(spectatingPlayerId);
+
+        int new_player_index = -1;
+        if (current_player_index == -1)
+        {
+            new_player_index = playerList.Count - 1;
+        }
+        else
+        {
+            new_player_index = current_player_index - 1;
+            if(new_player_index < 0)
+                new_player_index = playerList.Count - 1;
+        }
+
+        int client_id = GetClientIDByIndex(new_player_index);
+
+        Debug.Log($"[{this.GetType()}] Spectate Previous Player:{client_id}");
+
+        StartSpectatingPlayer(client_id);
+    }
+
+    void StartSpectatingPlayer(int client_id)
+    {
+        if (client_id == -1)
+            return;
+
+        if (playerList.ContainsKey((ulong)client_id) == false)
+            return;
+
+        spectatingPlayerId = client_id;
+
+        Player player = playerList[(ulong)client_id];
+
+        if (player.currentEffectIndex.Value != -1)
+            effectManager.StartEffect(player.currentEffectIndex.Value);
+
+        if (player.targetEffectIndex.Value != -1)
+            effectManager.StartEffect(player.targetEffectIndex.Value);
+    }
+
+    void RemoveSpectatingPlayer()
+    {
+        effectManager.StopAllEffect();
+
+        spectatingPlayerId = -1;
+    }
+
+    void OnLostSpectatingPlayer()
+    {
+        RemoveSpectatingPlayer();
+
+        SpectateNextPlayer();
+    }
+
+    int GetClientIDByIndex(int player_index)
+    {
+        int client_id = -1;
+        int index = 0;
+        foreach(var player in playerList)
+        {
+            if(index == player_index)
+            {
+                client_id = (int)player.Key;
+                break;
+            }
+            index++;
+        }
+        return client_id;
+    }
+
+    int GetIndexByClientID(int client_id)
+    {
+        int player_index = -1;
+        int index = 0;
+        foreach (var player in playerList)
+        {
+            if (client_id == (int)player.Key)
+            {
+                player_index = index;
+                break;
+            }
+            index++;
+        }
+        return player_index;
+    }
+
+
 
     //private static PlayerManager _Instance;
 

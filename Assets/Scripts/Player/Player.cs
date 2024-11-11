@@ -64,8 +64,6 @@ public class Player : NetworkBehaviour
 
     public NetworkVariable<int> handshakeTargetClientID = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    int stackedTargetIndex = -1;
-
     PlayerManager playerManager;
     EffectManager effectManager;
 
@@ -74,20 +72,8 @@ public class Player : NetworkBehaviour
     Transform hand;
     public Transform Hand { get => hand; }
 
-    float blendingSpeed = 1;
-    float blendingDirection = 0;
     public float lastChangeEffectTime = 0;
-    float effectChangeProtectionTime = 5;
 
-    float viewAngleThreshold = 60; // Below this angle, it is within the field of view
-
-    float maxDistanceThreshold = 1; // Maximum distance thresold within which will blend effect
-    float minDistanceThreshold = 0.2f; // Minimum distance threshold within which will be considered as same place
-
-    //public int handshakeFrameCount = 0;
-    int handshakeFrameThreshold = 60;
-
-    bool handshakeLock = false;
 
     void Awake()
     {
@@ -123,202 +109,21 @@ public class Player : NetworkBehaviour
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Lerp", effectLerp.Value.ToString());
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("HandshakeFrameCount", handshakeFrameCount.Value.ToString());
 
-        
-    }
-    /*
-    void Update()
-    {
-        if (IsOwner == false || IsSpawned == false)
-            return;
-
-        if (GameManager.Instance.GameMode == GameMode.Undefined)
-            return;
-
-        // If it's in Player Mode and has passed 5 seconds since last effect change
-        if(GameManager.Instance.IsRolePlayer(this) && Time.time - lastChangeEffectTime > effectChangeProtectionTime)
-        {
-            float min_dis = float.MaxValue;
-            Player nearest_player = null;
-
-            CalculatePositionAndOrientation(ref min_dis, ref nearest_player);
-
-            // If someone is near            
-            if (nearest_player != null && min_dis <= maxDistanceThreshold && handshakeLock == false)
-            {
-                stackedTargetIndex = nearest_player.currentEffectIndex.Value;
-
-                // Set target effect with other player's effect index
-                SetTargetEffect(nearest_player.currentEffectIndex.Value);
-
-                
-
-                // Falloff
-                float max_lerp = Utilities.Remap(min_dis, minDistanceThreshold, maxDistanceThreshold, 1, 0, need_clamp:true);
-                float lerp_value = Mathf.Min(effectLerp.Value + Time.deltaTime * blendingSpeed, max_lerp);
-
-                if (lerp_value > 1)
-                {
-                    lerp_value = 1;
-                }
-
-                effectLerp.Value = lerp_value;
-
-                // Handshake timer
-                if(min_dis < minDistanceThreshold)
-                {
-                    handshakeFrameCount++;
-
-                    // Handshake finished
-                    if (handshakeFrameCount > handshakeFrameThreshold)
-                    {
-                        handshakeFrameCount = handshakeFrameThreshold;
-                        
-                        SwitchEffect();
-
-                        handshakeLock = true;
-                    }
-                }
-            }
-
-            // If no one is near
-            if(nearest_player == null || min_dis > maxDistanceThreshold)
-            {
-                float lerp_value = effectLerp.Value - Time.deltaTime * blendingSpeed;                
-
-                if (lerp_value < 0)
-                {
-                    lerp_value = 0;
-
-                    stackedTargetIndex = -1;
-
-                    ClearTargetEffect();
-
-                    handshakeLock = false;
-                }
-
-                effectLerp.Value = lerp_value;
-
-                handshakeFrameCount--;
-                if (handshakeFrameCount < 0)
-                {
-                    handshakeFrameCount = 0;
-                }
-            }
-
-            // UpdateEffect()
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Effect Count", effectManager.EffectCount.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Current Effect", currentEffectIndex.Value.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Target Effect", targetEffectIndex.Value.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("stackedTargetIndex", stackedTargetIndex.ToString());
-
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Player Count", playerManager.PlayerList.Count.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Nearest Player", nearest_player == null ? "Null" : nearest_player.OwnerClientId.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Distance", nearest_player == null ? "Null" : min_dis.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Lerp", effectLerp.Value.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("HandshakeFrameCount", handshakeFrameCount.ToString());
-            Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Handshake Lock", handshakeLock.ToString());
-        }
-
-
-        if(role.Value == PlayerRole.Spectator || role.Value == PlayerRole.Host)
-        {
-            // UpdateEffect()
-        }
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Role", role.Value.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Spectating Player", playerManager.SpectatingPlayerId.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Spectating Player Current Effect", playerManager.ActivePlayer == null ? "Null" : playerManager.ActivePlayer.currentEffectIndex.Value.ToString());
+        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("Spectating Player Target Effect", playerManager.ActivePlayer == null ? "Null" : playerManager.ActivePlayer.targetEffectIndex.Value.ToString());
     }
 
-    void CalculatePositionAndOrientation(ref float min_dis, ref Player nearest_player)
-    {
-        foreach(var player in playerManager.PlayerList)
-        {
-            if (player.Key == NetworkManager.Singleton.LocalClientId)
-                continue;
-
-            if (GameManager.Instance.IsRolePlayer(player.Value) == false)
-                continue;
-
-            ////////////////////////////////////
-            // Logic 1#
-            // Both people's hands must be visible            
-            if (IsHandVisible(player.Value) == false)
-                continue;
-
-            // Two people must face to face
-            if (IsFaceToFace(player.Value) == false)
-                continue;
-
-            float distance = distance = Vector3.Distance(player.Value.Hand.position, hand.position);
-
-            if (distance < min_dis)
-            {
-                min_dis = distance;
-                nearest_player = player.Value;
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Return true if both people's hands are visible
-    /// </summary>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    bool IsHandVisible(Player player)
-    {
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"Hand of Player {player.OwnerClientId}", player.Hand.position.ToString());
-
-        return (player.Hand != null && player.Hand.position != Vector3.zero && hand != null && hand.position != Vector3.zero);
-    }
-
-    /// <summary>
-    /// Return true if the angle between two people's body is larger than threshold
-    /// </summary>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    bool IsFaceToFace(Player player)
-    {
-        if (player.Body == null || body == null)
-            return false;
-
-        float angle_other_to_self = GetViewAngle(this, player.Body.position);
-
-        float angle_self_to_other = GetViewAngle(player, body.position);
-
-        bool result = angle_other_to_self < viewAngleThreshold && angle_self_to_other < viewAngleThreshold;
-
-        Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo($"IsFaceToFace", $"({angle_other_to_self.ToString("0.00")}, {angle_self_to_other.ToString("0.00")}, {result.ToString()})");
-
-        return result;
-    }
-
-    float GetViewAngle(Player player, Vector3 pos)
-    {
-        if (player.Body == null)
-            return -1;
-
-        float angle = Vector3.Angle(player.Body.forward, pos - player.Body.position);
-
-        return angle;
-    }
-
-    bool IsInsideView(Player player)
-    {
-        if (player.Body == null || body == null)
-            return false;
-
-        float angle = Vector3.Angle(body.forward, player.Body.position - body.position);
-
-        return angle < viewAngleThreshold;
-    }
-    */
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
 
-        if (IsOwner == false)
-            return;
-
         currentEffectIndex.OnValueChanged += OnCurrentEffectIndexChanged;
         targetEffectIndex.OnValueChanged += OnTargetEffectIndexChanged;
+
+        if (IsOwner == false)
+            return;
 
         if (GameManager.Instance != null)
         {
@@ -341,11 +146,11 @@ public class Player : NetworkBehaviour
     {
         base.OnNetworkDespawn();
 
-        if (IsOwner == false)
-            return;
-
         currentEffectIndex.OnValueChanged -= OnCurrentEffectIndexChanged;
         targetEffectIndex.OnValueChanged -= OnTargetEffectIndexChanged;
+
+        if (IsOwner == false)
+            return;
 
         if (GameManager.Instance != null)
         {
@@ -357,13 +162,21 @@ public class Player : NetworkBehaviour
 
     void OnRoleSpecified(GameMode game_mode, PlayerRole player_role)
     {
-        playerManager.SetLocalPlayer(this);
-
         role.Value = player_role;
+
+        if(player_role == PlayerRole.Spectator)
+        {
+            playerManager.SpectateNextPlayer();
+        }
     }
 
     void OnCurrentEffectIndexChanged(int prev_index, int new_index)
     {
+        //if (role.Value != PlayerRole.Player && (role.Value == PlayerRole.Spectator && playerManager.LocalPlayer != this))
+        //    return;
+        if (playerManager.ActivePlayer == null || playerManager.ActivePlayer != this)
+            return;
+
         if (prev_index != -1)
             effectManager.StopEffect(prev_index);
 
@@ -373,6 +186,11 @@ public class Player : NetworkBehaviour
 
     void OnTargetEffectIndexChanged(int prev_index, int new_index)
     {
+        //if (role.Value != PlayerRole.Player && (role.Value != PlayerRole.Spectator && playerManager.ActivePlayer != this))
+        //    return;
+        if (playerManager.ActivePlayer == null || playerManager.ActivePlayer != this)
+            return;
+
         if (prev_index != -1 && prev_index != currentEffectIndex.Value)
             effectManager.StopEffect(prev_index);
 
@@ -380,81 +198,4 @@ public class Player : NetworkBehaviour
             effectManager.StartEffect(new_index);
     }
 
-    /*
-    void InitializeEffect()
-    {
-        Debug.Log($"[{this.GetType()}] Initialize Effect");
-
-        int effect_index = (int)OwnerClientId % effectManager.EffectCount; //Random.Range(0, effectManager.EffectCount);
-
-        SetEffect(effect_index);
-
-        SetTargetEffect(-1);
-
-        effectLerp.Value = 0;
-
-        blendingDirection = 0;
-    }
-
-    void SetEffect(int effect_index)
-    {
-        if (effect_index < 0)
-            return;
-
-        if (effect_index == currentEffectIndex.Value)
-            return;
-
-        lastChangeEffectTime = Time.time;
-
-
-        int last_effect_index = currentEffectIndex.Value;
-        effectManager.StopEffect(last_effect_index);
-
-
-        currentEffectIndex.Value = effect_index;        
-        effectManager.StartEffect(effect_index);
-    }
-
-    public void SetTargetEffect(int effect_index)
-    {
-        if (targetEffectIndex.Value == effect_index)
-            return;
-
-        if(targetEffectIndex.Value != -1)
-        {
-            effectManager.StopEffect(targetEffectIndex.Value);
-        }
-
-        targetEffectIndex.Value = effect_index;
-        effectManager.StartEffect(effect_index);
-    }
-
-    void ClearTargetEffect()
-    {
-        SetTargetEffect(-1);
-    }
-
-    void SwitchEffect()
-    {
-        SetEffect(stackedTargetIndex);
-
-        ClearTargetEffect();
-    }
-
-    public void ChangeToNextEffect()
-    {
-        int new_effect_index = (currentEffectIndex.Value + 1) % effectManager.EffectCount;
-
-        SetEffect(new_effect_index);
-    }
-
-    public void ChangeToPreviousEffect()
-    {
-        int new_effect_index = (currentEffectIndex.Value - 1);
-        if (new_effect_index < 0)
-            new_effect_index = effectManager.EffectCount - 1;
-
-        SetEffect(new_effect_index);
-    }
-    */
 }
