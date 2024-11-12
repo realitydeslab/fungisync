@@ -122,24 +122,24 @@ public class Player : NetworkBehaviour
         currentEffectIndex.OnValueChanged += OnCurrentEffectIndexChanged;
         targetEffectIndex.OnValueChanged += OnTargetEffectIndexChanged;
 
-        if (IsOwner == false)
-            return;
+        //if (IsOwner == false)
+        //    return;
 
-        if (GameManager.Instance != null)
-        {
-            // Not sure the execution order between OnNetworkSpawn and OnRoleSpecified.
-            // Need to make sure that player can be set role correctly.
-            // If OnNetworkSpawn is executed before OnRoleSpecified
-            GameManager.Instance.OnRoleSpecified.AddListener(OnRoleSpecified); 
+        //if (GameManager.Instance != null)
+        //{
+        //    // Not sure the execution order between OnNetworkSpawn and OnRoleSpecified.
+        //    // Need to make sure that player can be set role correctly.
+        //    // If OnNetworkSpawn is executed before OnRoleSpecified
+        //    GameManager.Instance.OnRoleSpecified.AddListener(OnRoleSpecified);
 
-            // If OnNetworkSpawn is executed after OnRoleSpecified
-            if (GameManager.Instance.GameMode != GameMode.Undefined)
-            {
-                OnRoleSpecified(GameManager.Instance.GameMode, GameManager.Instance.PlayerRole);
-            }
-        }
+        //    // If OnNetworkSpawn is executed after OnRoleSpecified
+        //    if (GameManager.Instance.GameMode != GameMode.Undefined)
+        //    {
+        //        OnRoleSpecified(GameManager.Instance.GameMode, GameManager.Instance.PlayerRole);
+        //    }
+        //}
 
-        Debug.Log("OnNetworkSpawn");
+        //Debug.Log("OnNetworkSpawn");
     }
 
     public override void OnNetworkDespawn()
@@ -149,26 +149,26 @@ public class Player : NetworkBehaviour
         currentEffectIndex.OnValueChanged -= OnCurrentEffectIndexChanged;
         targetEffectIndex.OnValueChanged -= OnTargetEffectIndexChanged;
 
-        if (IsOwner == false)
-            return;
+        //if (IsOwner == false)
+        //    return;
 
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnRoleSpecified.RemoveListener(OnRoleSpecified);
-        }
+        //if (GameManager.Instance != null)
+        //{
+        //    GameManager.Instance.OnRoleSpecified.RemoveListener(OnRoleSpecified);
+        //}
 
-        Debug.Log("OnNetworkDespawn");
+        //Debug.Log("OnNetworkDespawn");
     }
 
-    void OnRoleSpecified(GameMode game_mode, PlayerRole player_role)
-    {
-        role.Value = player_role;
+    //void OnRoleSpecified(GameMode game_mode, PlayerRole player_role)
+    //{
+    //    role.Value = player_role;
 
-        if(player_role == PlayerRole.Spectator)
-        {
-            playerManager.SpectateNextPlayer();
-        }
-    }
+    //    if(player_role == PlayerRole.Spectator)
+    //    {
+    //        playerManager.SpectateNextPlayer();
+    //    }
+    //}
 
     void OnCurrentEffectIndexChanged(int prev_index, int new_index)
     {

@@ -199,7 +199,7 @@ public class GameManager : MonoBehaviour
 
     void WaitForPlayerPrefabSpawned(System.Action<bool, string> action)
     {
-        StartCoroutine(WaitForPlayerPrefabSpawnedCoroutine(10, action));
+        StartCoroutine(WaitForPlayerPrefabSpawnedCoroutine(3, action));
     }
 
     IEnumerator WaitForPlayerPrefabSpawnedCoroutine(float time_out, System.Action<bool, string> action)
@@ -226,9 +226,14 @@ public class GameManager : MonoBehaviour
 
     void StartGame(GameMode game_mode, PlayerRole player_role)
     {
-        environmentProbe.EnableEnvironmentProbe();
+        WaitForPlayerPrefabSpawned((result, msg) => {
 
-        SetRole(game_mode, player_role);
+            environmentProbe.EnableEnvironmentProbe();
+
+            SetRole(game_mode, player_role);
+
+            playerManager.InitializePlayerManager(player_role);
+        });        
     }
 
     public void RestartGame(System.Action action)
@@ -416,6 +421,23 @@ public class GameManager : MonoBehaviour
         playerManager.ChangeToNextEffect();
     }
     #endregion
+
+    public void SpectatePreviousPlayer()
+    {
+        if (gameMode != GameMode.MultiplePlayer || playerRole != PlayerRole.Spectator)
+            return;
+
+        playerManager.SpectatePreviousPlayer();
+    }
+
+    public void SpectateNextPlayer()
+    {
+        if (gameMode != GameMode.MultiplePlayer || playerRole != PlayerRole.Spectator)
+            return;
+
+        playerManager.SpectateNextPlayer();
+    }
+
 
     #region Query Functions
     public bool IsRolePlayer(Player player)

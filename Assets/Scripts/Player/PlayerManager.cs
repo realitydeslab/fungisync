@@ -64,21 +64,21 @@ public class PlayerManager : NetworkBehaviour
         // Update Player List
         UpdatePlayerList();
 
-        // Update Local Player
-        // PlayerRole.Player: use local player as LocalPlayer
-        // PlayerRole.Spectator: specify one of the player as LocalPlayer
-        if (GameManager.Instance.PlayerRole == PlayerRole.Player)
-        {
-            activePlayer = playerList.ContainsKey(NetworkManager.Singleton.LocalClientId) ? playerList[NetworkManager.Singleton.LocalClientId] : null;
-        }           
-        else if (GameManager.Instance.PlayerRole == PlayerRole.Spectator)
-        {
-            activePlayer = spectatingPlayerId != -1 && playerList.ContainsKey((ulong)spectatingPlayerId) ? playerList[(ulong)spectatingPlayerId] : null;
-        }
-        else
-        {
-            activePlayer = null;
-        }
+        //// Update Local Player
+        //// PlayerRole.Player: use local player as LocalPlayer
+        //// PlayerRole.Spectator: specify one of the player as LocalPlayer
+        //if (GameManager.Instance.PlayerRole == PlayerRole.Player)
+        //{
+        //    activePlayer = playerList.ContainsKey(NetworkManager.Singleton.LocalClientId) ? playerList[NetworkManager.Singleton.LocalClientId] : null;
+        //}           
+        //else if (GameManager.Instance.PlayerRole == PlayerRole.Spectator)
+        //{
+        //    activePlayer = spectatingPlayerId != -1 && playerList.ContainsKey((ulong)spectatingPlayerId) ? playerList[(ulong)spectatingPlayerId] : null;
+        //}
+        //else
+        //{
+        //    activePlayer = null;
+        //}
 
 
 
@@ -472,9 +472,22 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    public void SetLocalPlayer(Player player)
+    public void InitializePlayerManager(PlayerRole player_role)
     {
-        activePlayer = player;
+        Player local_player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
+        local_player.role.Value = player_role;
+
+
+        if (player_role == PlayerRole.Player)
+        {
+            activePlayer = local_player;
+        }
+        else if (player_role == PlayerRole.Spectator)
+        {
+            UpdatePlayerList();
+
+            SpectateNextPlayer();
+        }
     }
 
     public void ResetPlayerManager()
@@ -555,15 +568,24 @@ public class PlayerManager : NetworkBehaviour
         if (playerList.ContainsKey((ulong)client_id) == false)
             return;
 
+        if(spectatingPlayerId != -1 && activePlayer != null)
+        {
+            if (activePlayer.currentEffectIndex.Value != -1)
+                effectManager.StopEffect(activePlayer.currentEffectIndex.Value);
+
+            if (activePlayer.targetEffectIndex.Value != -1)
+                effectManager.StopEffect(activePlayer.targetEffectIndex.Value);
+        }
+
         spectatingPlayerId = client_id;
 
-        Player player = playerList[(ulong)client_id];
+        activePlayer = playerList[(ulong)client_id];
 
-        if (player.currentEffectIndex.Value != -1)
-            effectManager.StartEffect(player.currentEffectIndex.Value);
+        if (activePlayer.currentEffectIndex.Value != -1)
+            effectManager.StartEffect(activePlayer.currentEffectIndex.Value);
 
-        if (player.targetEffectIndex.Value != -1)
-            effectManager.StartEffect(player.targetEffectIndex.Value);
+        if (activePlayer.targetEffectIndex.Value != -1)
+            effectManager.StartEffect(activePlayer.targetEffectIndex.Value);
     }
 
     void RemoveSpectatingPlayer()
@@ -571,6 +593,8 @@ public class PlayerManager : NetworkBehaviour
         effectManager.StopAllEffect();
 
         spectatingPlayerId = -1;
+
+        activePlayer = null;
     }
 
     void OnLostSpectatingPlayer()

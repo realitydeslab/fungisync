@@ -304,7 +304,11 @@ public class UIManager : MonoBehaviour
         if(GameManager.Instance.GameMode == GameMode.SinglePlayer)
         {
             GameManager.Instance.ChangeToPreviousEffect();
-        }        
+        }
+        else if(GameManager.Instance.GameMode == GameMode.MultiplePlayer && GameManager.Instance.PlayerRole == PlayerRole.Spectator)
+        {
+            GameManager.Instance.SpectatePreviousPlayer();
+        }
     }
 
     void OnClickRightArrow()
@@ -312,6 +316,10 @@ public class UIManager : MonoBehaviour
         if (GameManager.Instance.GameMode == GameMode.SinglePlayer)
         {
             GameManager.Instance.ChangeToNextEffect();
+        }
+        else if (GameManager.Instance.GameMode == GameMode.MultiplePlayer && GameManager.Instance.PlayerRole == PlayerRole.Spectator)
+        {
+            GameManager.Instance.SpectateNextPlayer();
         }
     }
     #endregion
@@ -342,12 +350,13 @@ public class UIManager : MonoBehaviour
             inputPassword.text = serverPassword;
         }
 
-        // Extra operation: Show left, right arrow if in single player mode
+        // Extra operation: Show left, right arrow if in single player mode or spectator mode
         if(target_page == pageGame)
         {
+            bool show_arrows = GameManager.Instance.GameMode == GameMode.SinglePlayer || (GameManager.Instance.GameMode == GameMode.MultiplePlayer && GameManager.Instance.PlayerRole == PlayerRole.Spectator);
             for (int i = 0; i < pageGame.childCount; i++)
             {
-                pageGame.GetChild(i).gameObject.SetActive(GameManager.Instance.GameMode == GameMode.SinglePlayer);
+                pageGame.GetChild(i).gameObject.SetActive(show_arrows);
             }
         }
 

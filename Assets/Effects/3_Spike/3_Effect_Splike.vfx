@@ -90,7 +90,7 @@ MonoBehaviour:
   uiBounds:
     serializedVersion: 2
     x: -1575
-    y: -1433
+    y: -1432
     width: 4300
     height: 2754
 --- !u!114 &114350483966674976
@@ -7448,7 +7448,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.AABox, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"center":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":1.0,"y":1.0,"z":1.0}}'
+      m_SerializableObject: '{"center":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":10.0,"y":10.0,"z":10.0}}'
     m_Space: 1
   m_Property:
     name: bounds

@@ -110,9 +110,9 @@ public class EffectBase : MonoBehaviour
         marchingDistance = 0;
         effectRange = Vector2.zero;
 
-        player = null;
-
         Debug.Log($"Player(id={player.OwnerClientId})Stop Effect:{effectIndex} ({this.GetType()})");
+
+        player = null;
     }
 
     
