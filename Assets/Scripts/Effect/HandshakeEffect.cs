@@ -25,12 +25,14 @@ public class HandshakeEffect : MonoBehaviour
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.LocalClient == null || NetworkManager.Singleton.LocalClient.PlayerObject == null || NetworkManager.Singleton.LocalClient.PlayerObject.IsSpawned == false)
             return;
 
-        Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
+        //Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
+
+        Player player = playerManager.ActivePlayer;
         if (player == null || player.IsSpawned == false)
             return;
 
-        if (GameManager.Instance.IsRolePlayer(player) == false)
-            return;
+        //if (GameManager.Instance.IsRolePlayer(player) == false)
+        //    return;
 
 
         bool is_handshaking = player.handshakeFrameCount.Value > 0 && player.handshakeTargetPosition.Value != Vector3.zero;
