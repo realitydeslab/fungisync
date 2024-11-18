@@ -6667,7 +6667,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615240}
   m_ExposedName: HitPosition
   m_Exposed: 1
-  m_Order: 12
+  m_Order: 11
   m_Category: RayCaster
   m_Min:
     m_Type:
@@ -6850,7 +6850,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615248}
   m_ExposedName: HitNormal
   m_Exposed: 1
-  m_Order: 13
+  m_Order: 12
   m_Category: RayCaster
   m_Min:
     m_Type:
@@ -7688,7 +7688,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615274}
   m_ExposedName: DidHit
   m_Exposed: 1
-  m_Order: 11
+  m_Order: 10
   m_Category: RayCaster
   m_Min:
     m_Type:
@@ -9010,7 +9010,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615622}
   m_ExposedName: AudioVolume
   m_Exposed: 1
-  m_Order: 14
+  m_Order: 13
   m_Category: Audio
   m_Min:
     m_Type:
@@ -9082,7 +9082,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615624}
   m_ExposedName: AudioPitch
   m_Exposed: 1
-  m_Order: 15
+  m_Order: 14
   m_Category: Audio
   m_Min:
     m_Type:
@@ -10963,7 +10963,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615726}
   m_ExposedName: HumanStencilTextureMatrix
   m_Exposed: 1
-  m_Order: 16
+  m_Order: 15
   m_Category: HumanStencil
   m_Min:
     m_Type:

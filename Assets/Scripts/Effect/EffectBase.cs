@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.VFX;
+using UnityEngine.XR.ARFoundation;
 using Xiaobo.UnityToolkit.Core;
 
 public class EffectBase : MonoBehaviour
@@ -21,6 +23,7 @@ public class EffectBase : MonoBehaviour
     //DepthImageProcessor depthImageProcessor;
     [SerializeField] protected bool needPushAudioData = false;
 
+    MeshingMaterialManager meshingMaterialManager;
 
     EnvironmentProbe environmentProbe;
 
@@ -42,23 +45,6 @@ public class EffectBase : MonoBehaviour
 
     void Awake()
     {
-        //depthImageProcessor = FindFirstObjectByType<DepthImageProcessor>();
-        //if(depthImageProcessor == null)
-        //{
-        //    Debug.LogError($"[{this.GetType()}] Can't find DepthImageProcessor");
-        //}
-
-        //meshToBufferConverter = FindFirstObjectByType<MeshToBufferConvertor>();
-        //if (meshToBufferConverter == null)
-        //{
-        //    Debug.LogError($"[{this.GetType()}] Can't find MeshToBufferConverter");
-        //}
-        //meshingRaycaster = FindFirstObjectByType<MeshingRaycaster>();
-        //if (meshingRaycaster == null)
-        //{
-        //    Debug.LogError($"[{this.GetType()}] Can't find MeshingRaycaster");
-        //}
-
         playerManager = FindFirstObjectByType<PlayerManager>();
         if (playerManager == null)
         {
@@ -70,6 +56,12 @@ public class EffectBase : MonoBehaviour
         if(environmentProbe == null)
         {
             Debug.LogError($"[{this.GetType()}] Can't find EnvironmentProbe");
+        }
+
+        meshingMaterialManager = FindFirstObjectByType<MeshingMaterialManager>();
+        if (meshingMaterialManager == null)
+        {
+            Debug.LogError($"[{this.GetType()}] Can't find MeshingMaterialManager");
         }
 
 
@@ -86,14 +78,22 @@ public class EffectBase : MonoBehaviour
         if (isOn)
             return;
 
+        // initialize variables
         isOn = true;
-
-        vfx.enabled = true;
-
         marchingDistance = 0;
         effectRange = Vector2.zero;
 
+        // initialize local player
         player = playerManager.ActivePlayer;
+
+        // start vfx
+        StartVFXEffect();
+
+
+        // start material
+        StartMaterialEffect();
+
+
 
         Debug.Log($"Player(id={player.OwnerClientId})Start Effect:{effectIndex} ({this.GetType()})");
     }
@@ -103,19 +103,59 @@ public class EffectBase : MonoBehaviour
         if (isOn == false)
             return;
 
+        // initialize variables
         isOn = false;
-
-        vfx.enabled = false;
-
         marchingDistance = 0;
         effectRange = Vector2.zero;
+
+        // stop vfx
+        StopVFXEffect();
+
+
+        // stop material
+        StopMaterialEffect();
 
         Debug.Log($"Player(id={player.OwnerClientId})Stop Effect:{effectIndex} ({this.GetType()})");
 
         player = null;
     }
 
-    
+    void StartVFXEffect()
+    {
+        if (vfx == null)
+            return;
+
+        vfx.enabled = true;
+    }
+
+    void StopVFXEffect()
+    {
+        if (vfx == null)
+            return;
+
+        vfx.enabled = false;
+    }
+
+    void StartMaterialEffect()
+    {
+        if (mat == null)
+            return;
+
+        meshingMaterialManager.RegisterMeshingMaterial(mat);
+    }
+
+    void StopMaterialEffect()
+    {
+        if (mat == null)
+            return;
+
+        meshingMaterialManager.UnregisterMeshingMaterial(mat);
+    }
+
+    void Update()
+    {
+        UpdateVFXParameter();
+    }
 
     public virtual void UpdateVFXParameter()
     {
@@ -147,13 +187,17 @@ public class EffectBase : MonoBehaviour
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("EffectRangeX", effectRange.x.ToString());
         Xiaobo.UnityToolkit.Helper.HelperModule.Instance.SetInfo("EffectRangeY", effectRange.y.ToString());
 
-        // Update VFX
-        PushParametersToVFX();
 
 
-        // Update meshing material
-        PushParametersToMaterial();
-        
+        //// Update VFX
+        //PushParametersToVFX();
+
+
+        //// Update meshing material
+        //PushParametersToMaterial();
+
+        // Update both vfx and material
+        PushParameters();
     }
 
     void PushParametersToVFX()
@@ -227,13 +271,149 @@ public class EffectBase : MonoBehaviour
     {
         if (mat != null)
         {
-            mat.SetInt("_IsOn", isOn ? 1 : 0);
-            mat.SetFloat("_Alpha", effectAlpha);
+            if (mat.HasInt("_IsOn")) mat.SetInt("_IsOn", isOn ? 1 : 0);
+            if (mat.HasFloat("_Alpha")) mat.SetFloat("_Alpha", effectAlpha);
+            if (mat.HasColor("_EffectColor")) mat.SetColor("_EffectColor", effectColor);
+            if (mat.HasVector("_EffectRange")) mat.SetVector("_EffectRange", effectRange);
+            if (mat.HasFloat("_EffectWidth")) mat.SetFloat("_EffectWidth", effectWidth);
+            if (mat.HasVector("_Player_position")) mat.SetVector("_Player_position", player.Body.position);
+            if (mat.HasVector("_Player_angles")) mat.SetVector("_Player_angles", player.Body.eulerAngles);
+            
         }
     }
 
-    void Update()
+    void PushParameters()
     {
-        UpdateVFXParameter();
+        PushSingleParameter("IsOn", isOn);
+        PushSingleParameter("Alpha", effectAlpha);
+        PushSingleParameter("EffectColor", effectColor);
+        PushSingleParameter("EffectRange", effectRange);
+        PushSingleParameter("EffectWidth", effectWidth);
+        PushSingleParameter("Player_position", player.Body.position);
+        PushSingleParameter("Player_angles", player.Body.eulerAngles);
+
+        DepthImageProcessor depthImageProcessor = environmentProbe.DepthImageProcessor;
+        if (needPushHumanStencil == true && depthImageProcessor != null && depthImageProcessor.HumanStencilTexture != null)
+        {
+            Texture2D human_tex = depthImageProcessor.HumanStencilTexture;
+            human_tex.wrapMode = TextureWrapMode.Repeat;
+
+            PushSingleParameter("HumanStencilTexture", human_tex);
+            PushSingleParameter("HumanStencilTextureMatrix", depthImageProcessor.DisplayRotatioMatrix);
+        }
+
+        MeshToBufferConvertor meshToBufferConverter = environmentProbe.MeshToBufferConvertor;
+        if (needPushBuffer == true && meshToBufferConverter != null)
+        {
+            PushSingleParameter("VertexCount", meshToBufferConverter.VertexCount);
+            PushSingleParameter("VertexBuffer", meshToBufferConverter.VertexBuffer);
+            PushSingleParameter("NormalBuffer", meshToBufferConverter.NormalBuffer);
+        }
+
+
+        MeshingRaycaster meshingRaycaster = environmentProbe.MeshingRaycaster;
+        if (needPushHitPoint && meshingRaycaster != null)
+        {
+            PushSingleParameter("DidHit", meshingRaycaster.DidHit);
+            PushSingleParameter("HitPosition", meshingRaycaster.HitPosition);
+            PushSingleParameter("HitNormal", meshingRaycaster.HitNormal);
+        }
+
+        HolokitAudioProcessor audioProcessor = environmentProbe.AudioProcessor;
+        if (needPushAudioData && audioProcessor != null)
+        {
+            PushSingleParameter("AudioVolume", audioProcessor.AudioVolume);
+            PushSingleParameter("AudioPitch", audioProcessor.AudioPitch);
+        }
     }
+
+    void PushSingleParameter(string name, int value)
+    {
+        if (vfx != null && vfx.HasInt(name))
+            vfx.SetInt(name, value);
+
+        if(mat != null && mat.HasInt("_" + name))
+            mat.SetFloat("_" + name, value);
+    }
+
+    void PushSingleParameter(string name, bool value)
+    {
+        if (vfx != null && vfx.HasBool(name))
+            vfx.SetBool(name, value);
+
+        if (mat != null && mat.HasInt("_" + name))
+            mat.SetFloat("_" + name, value ? 1 : 0);
+    }
+
+    void PushSingleParameter(string name, float value)
+    {
+        if (vfx != null && vfx.HasFloat(name))
+            vfx.SetFloat(name, value);
+
+        if (mat != null && mat.HasFloat("_" + name))
+            mat.SetFloat("_" + name, value);
+    }
+
+    void PushSingleParameter(string name, Color value)
+    {
+        if (vfx != null && vfx.HasVector4(name))
+            vfx.SetVector4(name, value);
+
+        if (mat != null && mat.HasColor("_" + name))
+            mat.SetColor("_" + name, value);
+    }
+
+    void PushSingleParameter(string name, Vector2 value)
+    {
+        if (vfx != null && vfx.HasVector2(name))
+            vfx.SetVector2(name, value);
+
+        if (mat != null && mat.HasVector("_" + name))
+            mat.SetVector("_" + name, value);
+    }
+
+    void PushSingleParameter(string name, Vector3 value)
+    {
+        if (vfx != null && vfx.HasVector3(name))
+            vfx.SetVector3(name, value);
+
+        if (mat != null && mat.HasVector("_" + name))
+            mat.SetVector("_" + name, value);
+    }
+    void PushSingleParameter(string name, Vector4 value)
+    {
+        if (vfx != null && vfx.HasVector4(name))
+            vfx.SetVector4(name, value);
+
+        if (mat != null && mat.HasVector("_" + name))
+            mat.SetVector("_" + name, value);
+    }
+    void PushSingleParameter(string name, Matrix4x4 value)
+    {
+        if (vfx != null && vfx.HasMatrix4x4(name))
+            vfx.SetMatrix4x4(name, value);
+
+        if (mat != null && mat.HasMatrix("_" + name))
+            mat.SetMatrix("_" + name, value);
+    }
+
+    void PushSingleParameter(string name, Texture2D value)
+    {
+        if (vfx != null && vfx.HasTexture(name))
+            vfx.SetTexture(name, value);
+
+        if (mat != null && mat.HasTexture("_" + name))
+            mat.SetTexture("_" + name, value);
+    }
+
+    void PushSingleParameter(string name, GraphicsBuffer value)
+    {
+        if (vfx != null && vfx.HasGraphicsBuffer(name))
+            vfx.SetGraphicsBuffer(name, value);
+
+        //if (mat != null && mat.HasBuffer("_" + name))
+        //    mat.SetBuffer("_" + name, value);
+    }
+
+    
 }

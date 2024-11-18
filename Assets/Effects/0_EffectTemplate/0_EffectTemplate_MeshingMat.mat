@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: 0_EffectTemplate_MeshingMat
-  m_Shader: {fileID: -6465566751694194690, guid: cf270a662bb2d46358014b99601b0496, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 89e810a6637eb4ede818be77dfec44e8, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -58,6 +58,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HumanStencilTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -99,6 +103,8 @@ Material:
     - _Alpha: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _AudioPitch: 0
+    - _AudioVolume: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
@@ -108,13 +114,16 @@ Material:
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
+    - _DidHit: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
+    - _EffectWidth: 2
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _InOn: 0
+    - _IsOn: 1
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -127,12 +136,19 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
+    - _VertexCount: 62023
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EffectColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EffectRange: {r: 2.05107, g: 0.051069975, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HitNormal: {r: -0.04341052, g: 0.99905497, b: 0.0021356633, a: 0}
+    - _HitPosition: {r: -0.000000034854267, g: -0.045314405, b: 0.05131372, a: 0}
+    - _Player_angles: {r: 26.1, g: 180, b: 0, a: 0}
+    - _Player_position: {r: 0, g: 0.15, b: 0.45, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
