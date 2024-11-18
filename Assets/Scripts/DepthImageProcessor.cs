@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -41,9 +42,26 @@ public class DepthImageProcessor : MonoBehaviour
     ScreenOrientation m_CurrentScreenOrientation;
 
     /// <summary>
+    /// The current texture aspect ratio remembered so that we can resize the raw image layout when it changes.
+    /// </summary>
+    float m_TextureAspectRatio = 1.0f;
+
+    /// <summary>
     /// The display rotation matrix for the shader.
     /// </summary.
-    Matrix4x4 m_DisplayRotationMatrix = Matrix4x4.identity;
+    Matrix4x4 m_DisplayRotationMatrix = Matrix4x4.identity;    
+
+    /// <summary>
+    /// The UI RawImage used to display the image on screen.
+    /// </summary>
+    public RawImage rawImage
+    {
+        get => m_RawImage;
+        set => m_RawImage = value;
+    }
+
+    [SerializeField]
+    RawImage m_RawImage;
 
     public Matrix4x4 DisplayRotatioMatrix { get => m_DisplayRotationMatrix; }
 
@@ -111,5 +129,10 @@ public class DepthImageProcessor : MonoBehaviour
         m_DisplayRotationMatrix[1, 1] = affineBasisY.y;
         m_DisplayRotationMatrix[2, 0] = Mathf.Round(affineTranslation.x);
         m_DisplayRotationMatrix[2, 1] = Mathf.Round(affineTranslation.y);
+
+        if (m_RawImage != null && m_RawImage.gameObject.activeSelf)
+            m_RawImage.texture = occlusionManager.humanStencilTexture; 
     }
+
+
 }

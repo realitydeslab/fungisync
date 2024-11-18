@@ -8,6 +8,12 @@
         },
         {
             "m_Id": "37a498277b1742cdb55cbf372a87e362"
+        },
+        {
+            "m_Id": "58d63d5e87b24785922d2cbdf4af4edc"
+        },
+        {
+            "m_Id": "9dd7f3a302b34277a9cc8693544cabf4"
         }
     ],
     "m_Keywords": [],
@@ -15,6 +21,9 @@
     "m_CategoryData": [
         {
             "m_Id": "084a35dff1ea48b78b9eb9aa3b48b4a8"
+        },
+        {
+            "m_Id": "f34b70b1f31d495da4dc92261f5e45c8"
         }
     ],
     "m_Nodes": [
@@ -124,6 +133,12 @@
         },
         {
             "m_Id": "37a498277b1742cdb55cbf372a87e362"
+        },
+        {
+            "m_Id": "58d63d5e87b24785922d2cbdf4af4edc"
+        },
+        {
+            "m_Id": "9dd7f3a302b34277a9cc8693544cabf4"
         }
     ]
 }
@@ -380,6 +395,36 @@
 }
 
 {
+    "m_SGVersion": 3,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.ColorShaderProperty",
+    "m_ObjectId": "58d63d5e87b24785922d2cbdf4af4edc",
+    "m_Guid": {
+        "m_GuidSerialized": "f6449f73-52f4-4609-b221-506a088a8ba0"
+    },
+    "m_Name": "EffectColor",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "EffectColor",
+    "m_DefaultReferenceName": "_EffectColor",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+    },
+    "isMainColor": false,
+    "m_ColorMode": 0
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BlockNode",
     "m_ObjectId": "59930f38e89043df96bb6e9ad71bb66b",
@@ -542,6 +587,34 @@
     },
     "m_Labels": [],
     "m_Space": 0
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector3ShaderProperty",
+    "m_ObjectId": "9dd7f3a302b34277a9cc8693544cabf4",
+    "m_Guid": {
+        "m_GuidSerialized": "2db53f9a-f738-49b9-b4bd-d783d9dab811"
+    },
+    "m_Name": "Player_position",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Player_position",
+    "m_DefaultReferenceName": "_Player_position",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    }
 }
 
 {
@@ -719,5 +792,13 @@
         "m_SerializableColors": []
     },
     "m_SerializedDescriptor": "SurfaceDescription.Emission"
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "f34b70b1f31d495da4dc92261f5e45c8",
+    "m_Name": "Basic",
+    "m_ChildObjectList": []
 }
 
