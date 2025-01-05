@@ -8,12 +8,12 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Crystal_MeshingMat
-  m_Shader: {fileID: -6465566751694194690, guid: c5c955b16bb24494b8516b6d748d40b4, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 73d8106aeb6c54397b0f2acef3f5f875, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -24,8 +24,8 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _HumanStencilTexture:
-        m_Texture: {fileID: 0}
+    - _ColorTexture:
+        m_Texture: {fileID: 2800000, guid: bbb978ccd73d6456e82f00d755e396b9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -43,24 +43,21 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
-    - _AudioPitch: 0
-    - _AudioVolume: 0
-    - _DidHit: 0
-    - _EffectWidth: 0.5
-    - _IsOn: 1
+    - _ContrastPower: 12.7
+    - _ContrastStrength: 48.76
+    - _ContrastThreshold: 1.08
+    - _NoiseFrequency: 0.41
+    - _NoiseScale: 0.35
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _VertexCount: 62023
+    - _Speed: 2
+    - _TriplanarBlend: 1
+    - _TriplanarTile: 0.5
     m_Colors:
-    - _EffectColor: {r: 0, g: 0.0575552, b: 1, a: 1}
-    - _EffectRange: {r: 1.6006098, g: 1.1006098, b: 0, a: 0}
-    - _HitNormal: {r: 0, g: 0, b: 0, a: 0}
-    - _HitPosition: {r: 0, g: 0, b: 0, a: 0}
-    - _Player_angles: {r: 26.1, g: 180, b: 0, a: 0}
-    - _Player_position: {r: 0, g: 0.15, b: 0.45, a: 0}
+    - _Player: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &3859474347577471284
+--- !u!114 &1455188653206357156
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

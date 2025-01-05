@@ -24,7 +24,7 @@ EditorBuildSettings:
     path: Assets/Scenes/FungiSync.unity
     guid: dcd06bf06d99d4dfe9d0b97fdbee3556
   - enabled: 0
-    path: Assets/Test/TestMaterial/TestMaterial.unity
+    path: Assets/Scenes/TestMaterial/TestMaterial.unity
     guid: c1096233bd15343c8be3b6c89bdac380
   m_configObjects:
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 88cde986a78ce4c379f8237891e7a00e, type: 2}

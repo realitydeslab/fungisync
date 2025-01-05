@@ -1427,7 +1427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfx: {fileID: 89898076}
-  mat: {fileID: 0}
+  mat: {fileID: 2100000, guid: 1ed11631366c7403083839a4681be9de, type: 2}
   needPushBuffer: 1
   needPushHitPoint: 1
   needPushHumanStencil: 1
@@ -2193,7 +2193,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfx: {fileID: 208901890}
-  mat: {fileID: 0}
+  mat: {fileID: 2100000, guid: 220e35f867d714913aef87cbb0648847, type: 2}
   needPushBuffer: 1
   needPushHitPoint: 0
   needPushHumanStencil: 0
@@ -2961,7 +2961,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfx: {fileID: 326776015}
-  mat: {fileID: 0}
+  mat: {fileID: 2100000, guid: eebe1e8257317425db0e4fb1c778ab4a, type: 2}
   needPushBuffer: 0
   needPushHitPoint: 0
   needPushHumanStencil: 1
@@ -6947,6 +6947,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fc2967427e4a4164b127fd5a9a445d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  usingEchoVision: 0
 --- !u!1 &836081706
 GameObject:
   m_ObjectHideFlags: 0
@@ -8724,7 +8725,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfx: {fileID: 1071347977}
-  mat: {fileID: 0}
+  mat: {fileID: 2100000, guid: fc13decb5c92949e685b6cfed81c1b0b, type: 2}
   needPushBuffer: 1
   needPushHitPoint: 0
   needPushHumanStencil: 0

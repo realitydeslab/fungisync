@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Fungus_MeshingMat
-  m_Shader: {fileID: -6465566751694194690, guid: 4cb7b11072845419b9182e6e0bebc4cc, type: 3}
+  m_Name: Spike_MeshingMat
+  m_Shader: {fileID: -6465566751694194690, guid: 45902a74b60e54508bded0da4cf21f53, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -25,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _ColorTexture:
-        m_Texture: {fileID: 2800000, guid: 90d0868b579464c90ace402a8391719d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 09b3cbda30ca3425cab4e3d4a344758b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -43,8 +43,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
-    - _ContrastPower: 1.5
-    - _ContrastStrength: 1.1
+    - _ContrastPower: 6.24
+    - _ContrastStrength: 2.38
     - _ContrastThreshold: 0.82
     - _Height: 0
     - _NoiseFrequency: 2.27

@@ -7,13 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Fungus_MeshingMat
-  m_Shader: {fileID: -6465566751694194690, guid: 4cb7b11072845419b9182e6e0bebc4cc, type: 3}
+  m_Name: TestMaterial-A-2
+  m_Shader: {fileID: -6465566751694194690, guid: 200910ed604494caf8a3ab50ca6b23be, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -25,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _ColorTexture:
-        m_Texture: {fileID: 2800000, guid: 90d0868b579464c90ace402a8391719d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 58775717cde234511a99b1c7e191f237, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -42,24 +42,26 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1
-    - _ContrastPower: 1.5
-    - _ContrastStrength: 1.1
-    - _ContrastThreshold: 0.82
-    - _Height: 0
-    - _NoiseFrequency: 2.27
-    - _NoiseScale: 0.1
-    - _NoiseStrength: 1.94
+    - _Blend: 1
+    - _EmissionScale: 18.64
+    - _FBMFrequency: -0.18
+    - _FBMScale: 1.8
+    - _Height: 0.2
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Speed: 0.27
-    - _TriplanarBlend: 2.5
-    - _TriplanarTile: 0.38
+    - _Scale: 1
+    - _Speed: 1
+    - _Tile: 2.01
+    - _power: 6.5
     m_Colors:
+    - _Color: {r: 0, g: 0, b: 0, a: 1}
+    - _EffectRange: {r: 31.6, g: 0, b: 0, a: 0}
     - _Player: {r: 0, g: 0, b: 0, a: 0}
+    - _Vector2: {r: 0, g: -12.74, b: 0, a: 0}
+    - _Vector3: {r: 0.96, g: 4, b: 0.56, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &8728787593188408715
+--- !u!114 &7460777787500034044
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

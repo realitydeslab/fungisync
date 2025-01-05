@@ -4,6 +4,9 @@ using UnityEngine.XR.ARFoundation;
 
 public class MeshingMaterialManager : MonoBehaviour
 {
+    [SerializeField]
+    bool usingEchoVision = true;
+
     List<Material> matList = new List<Material>();
 
     ARMeshManager arMeshManager;
@@ -66,12 +69,13 @@ public class MeshingMaterialManager : MonoBehaviour
     void UpdateMeshingMaterials()
     {
 
-        // If want to enable meshing material, uncomment paragraph below
+        if (usingEchoVision)
+            return;
 
-        //Material[] mat_list = matList.ToArray();
-        //foreach(var mesh in arMeshManager.meshes)
-        //{
-        //    mesh.GetComponent<MeshRenderer>().sharedMaterials = mat_list;
-        //}
+        Material[] mat_list = matList.ToArray();
+        foreach (var mesh in arMeshManager.meshes)
+        {
+            mesh.GetComponent<MeshRenderer>().sharedMaterials = mat_list;
+        }
     }
 }
