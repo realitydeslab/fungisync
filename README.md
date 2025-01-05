@@ -39,3 +39,42 @@ Fungisync not only engages participants but also involves the audience through a
 DevCon @ Bangkok, Thailand
 Nov 12 - 15, 2024
 https://devcon.org/
+
+# Instruction
+## Requirement
+***It requires the iPhone model with a Lidar camera***, since this project utilizes the Meshing and Human Segmentation features from Apple ARKit.
+
+## How to Run
+- Unity Version: 6000.0 or above
+- Change build target to iOS in `Project Setting/Player settings`
+- Enable "Requires ARKit Support" in `Project Setting/Player settings`
+- Enable "Apple ARKit" in `Project Setting/XR Plug-in Management`
+
+## Structure
+<div>
+<img src="Documentation~/EffectStructure.png" width="480" />
+</div>
+
+As shown in the image above, all environmental probes are written as components for effects to use. 
+Effects must derive from **EffectBase** in order to be controlled by **EffectManager**.
+<br>
+We've built-in probe components and their toggles in EffectBase. Once a new Effect is derived from EffectBase, it automatically has the ability to use the data that probe components can provide.
+
+- **Vfx**: use to emit particles on the surface of mesh
+- **Mat**: use to replace the material drawn on the surface of mesh
+- **Need Push Buffer**: whether to push vertex buffer to VFX and Mat
+- **Need Push Hit Point**: whether to push raycasting point to VFX and Mat
+- **Need Push Human Stencil**: whether to push human stencil texture to VFX and Mat
+- **Need Push Audio Data**: whether to push audio data to VFX and Mat
+- **Effect Animation**
+    - Effect Max Range: Max spread distance
+    - Effect Width: Effect thickness when spreading
+    - Marching Mode: Animation type when spreading
+    - Marching Speed: Spreading speed
+<div>
+<img src="Documentation~/EffectTemplate.png" width="480" />
+</div>
+
+To create a new effect, it's easier by starting from effect template located in folder 'Effects'.
+
+
