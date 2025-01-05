@@ -17,6 +17,10 @@ public class PlayerManager : NetworkBehaviour
     Player activePlayer;
     public int SpectatingPlayerId { get => spectatingPlayerId; }
     int spectatingPlayerId = -1;
+
+
+    [SerializeField]
+    bool strictHandshakeMode = true;
     
 
     public UnityEvent<ulong> OnPlayerJoined;
@@ -313,22 +317,38 @@ public class PlayerManager : NetworkBehaviour
             if (IsInProtectionPeriod(p2))
                 continue;
 
-            ////////////////////////////////////
-            // Logic 1#
-            // Both people's hands must be visible            
-            if (IsHandVisible(p1, p2) == false)
-                continue;
 
-            // Two people must face to face
-            if (IsFaceToFace(p1, p2) == false)
-                continue;
-
-            float distance = distance = Vector3.Distance(p1.Hand.position, p2.Hand.position);
-
-            if (distance < min_dis)
+            if(strictHandshakeMode)
             {
-                min_dis = distance;
-                nearest_player = p2;
+                ////////////////////////////////////
+                // Logic 1#
+                // Both people's hands must be visible            
+                if (IsHandVisible(p1, p2) == false)
+                    continue;
+
+                // Two people must face to face
+                if (IsFaceToFace(p1, p2) == false)
+                    continue;
+
+                float distance = distance = Vector3.Distance(p1.Hand.position, p2.Hand.position);
+
+                if (distance < min_dis)
+                {
+                    min_dis = distance;
+                    nearest_player = p2;
+                }
+            }
+            else
+            {
+                ////////////////////////////////////
+                // Logic 2#
+                float distance = distance = Vector3.Distance(p1.Body.position, p2.Body.position);
+
+                if (distance < min_dis)
+                {
+                    min_dis = distance;
+                    nearest_player = p2;
+                }
             }
         }
     }
